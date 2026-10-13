@@ -1,10 +1,12 @@
 """Ресурстарды (шрифт, мәтін) жүктеу және кэштеу."""
 import json
+import sys
 from pathlib import Path
 
 import pygame
 
-ROOT = Path(__file__).resolve().parents[2]
+# PyInstaller (.exe) ішінде ресурстар sys._MEIPASS-та жатады
+ROOT = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[2]))
 FONT_REGULAR = ROOT / "assets" / "fonts" / "DejaVuSans.ttf"
 FONT_BOLD = ROOT / "assets" / "fonts" / "DejaVuSans-Bold.ttf"
 STRINGS_PATH = ROOT / "kolenke" / "data" / "strings_kk.json"

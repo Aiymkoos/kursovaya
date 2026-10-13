@@ -15,6 +15,7 @@ KEYMAP = {
     pygame.K_ESCAPE: "menu",
     pygame.K_UP: "up", pygame.K_DOWN: "down",
     pygame.K_RETURN: "confirm", pygame.K_KP_ENTER: "confirm",
+    pygame.K_m: "mute",
 }
 
 

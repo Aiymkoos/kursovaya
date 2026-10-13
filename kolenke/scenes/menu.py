@@ -42,6 +42,9 @@ class MenuScene(Scene):
                                 WHITE, (210, 90, 90))
         self._build_items()
 
+    def on_enter(self):
+        self.game.audio.loop("blizzard", 0.32)
+
     def _build_items(self):
         s = self.game.strings
         self.items = []
@@ -65,9 +68,12 @@ class MenuScene(Scene):
     def handle_action(self, action):
         if action == "up":
             self.index = (self.index - 1) % len(self.items)
+            self.game.audio.play("click", 0.5)
         elif action == "down":
             self.index = (self.index + 1) % len(self.items)
+            self.game.audio.play("click", 0.5)
         elif action == "confirm":
+            self.game.audio.play("tick", 0.7)
             self.items[self.index][1]()
         elif action == "menu":
             self.game.quit()

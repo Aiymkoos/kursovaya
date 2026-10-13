@@ -71,6 +71,7 @@ class FightScene(Scene):
         self.trails = {"player": [], self.enemy_name: []}
         self.result = None
         self.result_delay = 0.0
+        self._cue_tick = -1
         self.stats = {"parries": 0, "hits_taken": 0, "hits_given": 0}
 
     # --- енгізу ---
@@ -118,6 +119,7 @@ class FightScene(Scene):
                 n += 1
                 for ev in self.fight.tick():
                     self._on_event(ev)
+        self._audio_cues()
         self.particles.update(sim_dt)
         self.blizzard.update(sim_dt)
         self._update_flashes(sim_dt)
@@ -127,6 +129,21 @@ class FightScene(Scene):
             self.result_delay += dt
             if self.result_delay > (0.9 if self.fight.outcome == "restore" else 1.6):
                 self.result = "win" if self.fight.winner is self.fight.player else "lose"
+
+    def _audio_cues(self):
+        """Қимыл басталғанда дыбыс: қарсылас мотиві дайындық белгісі қызметін де атқарады."""
+        f, au = self.fight, self.game.audio
+        if self._cue_tick == f.frame_no:
+            return
+        self._cue_tick = f.frame_no
+        e, p = f.enemy, f.player
+        if e.phase == "startup" and e.frame == 1:
+            au.play("whoosh", 0.45)
+            motif = au.motif_for(self.enemy_name, e.state)
+            if motif:
+                au.play(motif, 0.7)
+        if p.phase == "startup" and p.frame == 1:
+            au.play("whoosh" if p.state == "heavy" else "whoosh_light", 0.4)
 
     def _update_flashes(self, dt):
         for f in self.flashes:
@@ -151,7 +168,9 @@ class FightScene(Scene):
     # --- эффектілер ---
     def _on_event(self, ev):
         s = self.game.strings
+        au = self.game.audio
         if ev.type == "parry":
+            au.play("parry", 1.0)
             self.zoom, self.zoom_pt = 0.07, (ev.x, ev.y)
             self.shake.add(0.55)
             self.slow_left = 0.7
@@ -163,10 +182,12 @@ class FightScene(Scene):
             else:   # Көлеңке ойыншыны «оқыды»
                 self.popups.append([s["fight_read"], ev.x, ev.y - 140, 1.2, (230, 90, 90)])
         elif ev.type == "block":
+            au.play("block", 0.8)
             self.shake.add(0.12)
             self._burst(ev.x, ev.y, 8, (200, 200, 210), 240)
             self.flashes.append([ev.x, ev.y, 180, 0.12, 0.12, (200, 200, 220)])
         elif ev.type == "hit":
+            au.play("heavy_hit" if ev.heavy else "hit", 0.9)
             m = self.game.fight_moves[ev.move]
             self.shake.add(m["shake"])
             self._burst(ev.x, ev.y, 10 + int(m["damage"] * 0.8), SPARK, 380)
@@ -178,18 +199,22 @@ class FightScene(Scene):
             else:
                 self.stats["hits_taken"] += 1
         elif ev.type == "mem_heal":
+            au.play("chime", 0.8)
             self._burst(ev.x, ev.y, 18, (255, 240, 200), 160)
             self.flashes.append([ev.x, ev.y, 300, 0.5, 0.5, (255, 235, 190)])
             self.popups.append([s["fight_heal"], ev.x, ev.y - 70, 0.9, (255, 240, 200)])
         elif ev.type == "mem_focus":
+            au.play("tick", 0.6)
             self.flashes.append([ev.x, ev.y, 300, 0.4, 0.4, (170, 215, 255)])
             self.popups.append([s["fight_focus"], ev.x, ev.y - 70, 0.9, PARRY_COL])
         elif ev.type == "restore":
+            au.play("chime", 1.0)
             self.slow_left = 1.2
             self.flashes.append([ev.x, ev.y, 520, 1.0, 1.0, (255, 245, 220)])
             self._burst(ev.x, ev.y, 60, (255, 245, 220), 260)
             self.popups.append([s["fight_restore"], ev.x, ev.y - 90, 1.6, (255, 245, 220)])
         elif ev.type == "ko":
+            au.play("boom", 0.9)
             self.zoom, self.zoom_pt = 0.11, (ev.x, ev.y)
             self.slow_left = 1.4
             self.shake.add(0.8)

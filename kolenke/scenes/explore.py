@@ -135,6 +135,7 @@ class ExploreScene(Scene):
             obj = self.near
             if obj is None:
                 return
+            self.game.audio.play("click", 0.6)
             if obj.kind == "door":
                 self.fade.start(lambda o=obj: self._go(o))
             elif obj.kind == "npc":

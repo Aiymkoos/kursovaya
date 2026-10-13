@@ -121,6 +121,9 @@ class EndingScene(Scene):
         self.bg = _gradient((w, h), top, bot)
         self.snow = Blizzard(w, h, count=int(160 * (1 - 0.7 * d)), wind=-100, seed=5)
 
+    def on_enter(self):
+        self.game.audio.play("chime" if self.count >= 3 else "swell", 0.8)
+
     @property
     def line(self):
         return self.ending["lines"][self.index]

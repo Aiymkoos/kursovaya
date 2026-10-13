@@ -137,14 +137,25 @@ class DialogueScene(Scene):
         self.bg = blurred_room(self.graph.bg, self.size)
         self.blizzard = Blizzard(w, h, count=120, wind=-200, seed=3)
         self.vignette = make_vignette((w, h))
+        self._last_states = dict(self.runner.states)
         self._reset_text()
+
+    def on_enter(self):
+        cast = self.graph.cast
+        motif = self.game.audio.motif_for(cast[0]) if cast else None
+        if motif:
+            self.game.audio.play(motif, 0.45)       # кейіпкер мотиві
 
     def _reset_text(self):
         self.shown = 0.0
         n = len(self.game.journal)
         if n > self._known:
             self.notice_time = 2.5
+            self.game.audio.play("chime", 0.5)
         self._known = n
+        if self.runner.states != self._last_states:    # көлеңке жұта бастады
+            self.game.audio.play("swell", 0.8)
+            self._last_states = dict(self.runner.states)
 
     @property
     def text(self):
@@ -170,6 +181,7 @@ class DialogueScene(Scene):
                 self._reset_text()
         elif action in CHOICE_ACTIONS and self.text_done and r.has_choices:
             if r.choose(CHOICE_ACTIONS[action]):
+                self.game.audio.play("click", 0.6)
                 self._reset_text()
 
     def update(self, dt):

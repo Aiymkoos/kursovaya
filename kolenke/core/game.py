@@ -2,6 +2,7 @@
 import pygame
 
 from kolenke.combat.fighter import load_combat_data
+from kolenke.core.audio import Audio
 from kolenke.core.assets import Assets, load_strings
 from kolenke.core.input import InputBuffer, action_for_key
 from kolenke.story.flags import Flags
@@ -21,6 +22,7 @@ class Game:
         pygame.display.set_caption("Көлеңке")
         self.clock = pygame.time.Clock()
         self.assets = Assets()
+        self.audio = Audio()
         self.strings = load_strings()
         self.fight_moves = load_combat_data()["moves"]
         self.input = InputBuffer()
@@ -100,6 +102,9 @@ class Game:
                     self.toggle_fullscreen()
                     continue
                 action = action_for_key(event.key)
+                if action == "mute":
+                    self.audio.toggle_mute()
+                    continue
                 if action:
                     self.held.add(action)
                     self.input.push(action)

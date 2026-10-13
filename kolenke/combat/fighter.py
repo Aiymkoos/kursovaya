@@ -108,6 +108,9 @@ class Fighter:
             if self.stun:
                 self.stun -= 1
         elif s in self.moves:
+            if cmd == "cancel" and self.phase == "startup":   # фінт: қимыл тоқтатылады
+                self.state, self.frame = "idle", 0
+                return
             self.frame += 1
             m = self.moves[s]
             if self.phase in ("startup", "active"):

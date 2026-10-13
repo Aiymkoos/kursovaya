@@ -3,31 +3,380 @@
   "block_cooldown": 14,
   "moves": {
     "light": {
-      "startup": 5, "active": 3, "recovery": 10, "damage": 8,
-      "reach": [20, 85], "hit_y": [40, 130], "hitstun": 15, "hitstop": 4,
-      "knock": 9, "step": 3, "shake": 0.15, "arm": [0.0, -0.4, 1.5, 0.0], "lean": -6
+      "startup": 5,
+      "active": 3,
+      "recovery": 10,
+      "damage": 8,
+      "reach": [
+        20,
+        85
+      ],
+      "hit_y": [
+        40,
+        130
+      ],
+      "hitstun": 15,
+      "hitstop": 4,
+      "knock": 9,
+      "step": 3,
+      "shake": 0.15,
+      "arm": [
+        0.0,
+        -0.4,
+        1.5,
+        0.0
+      ],
+      "lean": -6
     },
     "heavy": {
-      "startup": 15, "active": 4, "recovery": 22, "damage": 20,
-      "reach": [20, 112], "hit_y": [20, 150], "hitstun": 26, "hitstop": 8,
-      "knock": 22, "step": 4, "shake": 0.4, "arm": [0.4, 3.0, 1.3, 0.0], "lean": -12
+      "startup": 15,
+      "active": 4,
+      "recovery": 22,
+      "damage": 20,
+      "reach": [
+        20,
+        112
+      ],
+      "hit_y": [
+        20,
+        150
+      ],
+      "hitstun": 26,
+      "hitstop": 8,
+      "knock": 22,
+      "step": 4,
+      "shake": 0.4,
+      "arm": [
+        0.4,
+        3.0,
+        1.3,
+        0.0
+      ],
+      "lean": -12
     },
     "overhead": {
-      "startup": 34, "active": 4, "recovery": 26, "damage": 18,
-      "reach": [20, 105], "hit_y": [10, 160], "hitstun": 24, "hitstop": 7,
-      "knock": 20, "step": 5, "shake": 0.35, "arm": [0.5, 3.1, 1.3, 0.0], "lean": -10,
-      "weapon_len": 36, "tell_flag": "knows_overhead"
+      "startup": 34,
+      "active": 4,
+      "recovery": 26,
+      "damage": 18,
+      "reach": [
+        20,
+        105
+      ],
+      "hit_y": [
+        10,
+        160
+      ],
+      "hitstun": 24,
+      "hitstop": 7,
+      "knock": 20,
+      "step": 5,
+      "shake": 0.35,
+      "arm": [
+        0.5,
+        3.1,
+        1.3,
+        0.0
+      ],
+      "lean": -10,
+      "weapon_len": 36,
+      "tell_flag": "knows_overhead"
     },
     "slash": {
-      "startup": 24, "active": 4, "recovery": 24, "damage": 14,
-      "reach": [10, 120], "hit_y": [50, 120], "hitstun": 20, "hitstop": 6,
-      "knock": 16, "step": 6, "shake": 0.3, "arm": [0.2, -0.9, 1.65, 0.3], "lean": -8,
-      "weapon_len": 36, "tell_flag": "knows_tap"
+      "startup": 24,
+      "active": 4,
+      "recovery": 24,
+      "damage": 14,
+      "reach": [
+        10,
+        120
+      ],
+      "hit_y": [
+        50,
+        120
+      ],
+      "hitstun": 20,
+      "hitstop": 6,
+      "knock": 16,
+      "step": 6,
+      "shake": 0.3,
+      "arm": [
+        0.2,
+        -0.9,
+        1.65,
+        0.3
+      ],
+      "lean": -8,
+      "weapon_len": 36,
+      "tell_flag": "knows_tap"
+    },
+    "snare": {
+      "startup": 14,
+      "active": 3,
+      "recovery": 16,
+      "damage": 10,
+      "reach": [
+        15,
+        95
+      ],
+      "hit_y": [
+        60,
+        140
+      ],
+      "hitstun": 16,
+      "hitstop": 5,
+      "knock": 10,
+      "step": 4,
+      "shake": 0.2,
+      "arm": [
+        0.3,
+        -0.6,
+        1.6,
+        0.2
+      ],
+      "lean": -6,
+      "weapon_len": 30,
+      "tell_flag": "knows_snare"
+    },
+    "crash": {
+      "startup": 28,
+      "active": 4,
+      "recovery": 26,
+      "damage": 22,
+      "reach": [
+        15,
+        110
+      ],
+      "hit_y": [
+        10,
+        160
+      ],
+      "hitstun": 26,
+      "hitstop": 9,
+      "knock": 24,
+      "step": 5,
+      "shake": 0.45,
+      "arm": [
+        0.4,
+        3.1,
+        1.2,
+        0.0
+      ],
+      "lean": -10,
+      "weapon_len": 30,
+      "tell_flag": "knows_crash"
+    },
+    "stitch": {
+      "startup": 9,
+      "active": 2,
+      "recovery": 12,
+      "damage": 6,
+      "reach": [
+        10,
+        80
+      ],
+      "hit_y": [
+        50,
+        130
+      ],
+      "hitstun": 12,
+      "hitstop": 3,
+      "knock": 6,
+      "step": 5,
+      "shake": 0.1,
+      "arm": [
+        0.6,
+        0.2,
+        1.55,
+        0.5
+      ],
+      "lean": -4,
+      "weapon_len": 26,
+      "tell_flag": "knows_stitch"
+    },
+    "needle": {
+      "startup": 18,
+      "active": 3,
+      "recovery": 20,
+      "damage": 12,
+      "reach": [
+        20,
+        135
+      ],
+      "hit_y": [
+        60,
+        130
+      ],
+      "hitstun": 18,
+      "hitstop": 5,
+      "knock": 12,
+      "step": 6,
+      "shake": 0.2,
+      "arm": [
+        0.3,
+        -0.7,
+        1.57,
+        0.3
+      ],
+      "lean": -8,
+      "weapon_len": 34,
+      "tell_flag": "knows_needle"
+    },
+    "tick": {
+      "startup": 12,
+      "active": 3,
+      "recovery": 14,
+      "damage": 10,
+      "reach": [
+        15,
+        95
+      ],
+      "hit_y": [
+        50,
+        140
+      ],
+      "hitstun": 16,
+      "hitstop": 5,
+      "knock": 10,
+      "step": 4,
+      "shake": 0.2,
+      "arm": [
+        0.3,
+        -0.5,
+        1.5,
+        0.2
+      ],
+      "lean": -6,
+      "weapon_len": 28,
+      "tell_flag": "knows_tick"
+    },
+    "tock": {
+      "startup": 20,
+      "active": 3,
+      "recovery": 18,
+      "damage": 14,
+      "reach": [
+        15,
+        105
+      ],
+      "hit_y": [
+        30,
+        150
+      ],
+      "hitstun": 20,
+      "hitstop": 6,
+      "knock": 14,
+      "step": 5,
+      "shake": 0.28,
+      "arm": [
+        0.4,
+        2.8,
+        1.35,
+        0.1
+      ],
+      "lean": -9,
+      "weapon_len": 28,
+      "tell_flag": "knows_tock"
+    },
+    "sweep": {
+      "startup": 30,
+      "active": 4,
+      "recovery": 28,
+      "damage": 22,
+      "reach": [
+        10,
+        130
+      ],
+      "hit_y": [
+        30,
+        150
+      ],
+      "hitstun": 26,
+      "hitstop": 9,
+      "knock": 26,
+      "step": 7,
+      "shake": 0.45,
+      "arm": [
+        0.3,
+        -1.2,
+        1.57,
+        0.4
+      ],
+      "lean": -12,
+      "weapon_len": 30,
+      "tell_flag": "knows_sweep"
     }
   },
   "fighters": {
-    "player": { "hp": 100, "speed": 3.4, "moves": ["light", "heavy"], "accent": [110, 170, 230] },
-    "darkhan": { "hp": 120, "speed": 2.2, "moves": ["overhead", "slash"], "weapon": true,
-                 "accent": [230, 150, 50] }
+    "player": {
+      "hp": 100,
+      "speed": 3.4,
+      "moves": [
+        "light",
+        "heavy"
+      ],
+      "accent": [
+        110,
+        170,
+        230
+      ]
+    },
+    "darkhan": {
+      "hp": 120,
+      "speed": 2.2,
+      "moves": [
+        "overhead",
+        "slash"
+      ],
+      "weapon": true,
+      "accent": [
+        230,
+        150,
+        50
+      ]
+    },
+    "zhanel": {
+      "hp": 130,
+      "speed": 2.4,
+      "moves": [
+        "snare",
+        "crash"
+      ],
+      "weapon": true,
+      "accent": [
+        90,
+        210,
+        180
+      ]
+    },
+    "madina": {
+      "hp": 110,
+      "speed": 3.0,
+      "moves": [
+        "stitch",
+        "needle"
+      ],
+      "weapon": true,
+      "accent": [
+        205,
+        120,
+        215
+      ]
+    },
+    "bekzat": {
+      "hp": 170,
+      "speed": 2.8,
+      "moves": [
+        "tick",
+        "tock",
+        "sweep"
+      ],
+      "weapon": true,
+      "accent": [
+        240,
+        215,
+        120
+      ]
+    }
   }
 }

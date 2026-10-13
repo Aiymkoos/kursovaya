@@ -1,0 +1,9 @@
+bot,ai,player_hp_lost,enemy_hp_lost,player_win_rate,avg_seconds,timeouts
+aggressor,scripted,0.72,0.963,0.733,19.7,0
+aggressor,adaptive,0.899,0.603,0.267,17.5,0
+pattern,scripted,0.701,0.936,0.767,20.4,0
+pattern,adaptive,1.0,0.334,0.0,15.6,0
+random,scripted,0.85,0.834,0.433,21.0,0
+random,adaptive,0.818,0.821,0.467,22.0,0
+reactive,scripted,0.0,1.0,1.0,13.0,0
+reactive,adaptive,0.492,0.989,0.933,17.4,0

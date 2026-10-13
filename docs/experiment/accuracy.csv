@@ -1,0 +1,5 @@
+bot,random,last,frequency,markov1,markov2,markov3,ai_live_accuracy,fights_used
+aggressor,0.314,0.539,0.611,0.628,0.6,0.594,0.6,27
+pattern,0.39,0.279,0.512,0.678,0.844,0.844,0.844,30
+random,0.315,0.317,0.304,0.301,0.299,0.299,0.299,30
+reactive,0.314,0.261,0.533,0.467,0.419,0.419,0.419,30

@@ -8,7 +8,7 @@ import random
 
 import pygame
 
-from kolenke.combat.ai_scripted import ScriptedAI
+from kolenke.combat.ai.adaptive import AdaptiveAI
 from kolenke.combat.fight import MEMORY_COST, Fight, PlayerController
 from kolenke.combat.setup import RESTORE_RESERVE_COST, fight_params
 from kolenke.combat.hitbox import GROUND
@@ -36,8 +36,8 @@ class FightScene(Scene):
         self.tells_enabled = tells_enabled
         self.enemy_name = enemy
         self.night = night
-        self.ai_factory = ai or (lambda: ScriptedAI(seed=random.randint(0, 9999)
-                                                    if seed is None else seed))
+        self.ai_factory = ai or (lambda: AdaptiveAI.for_night(
+            night, seed=random.randint(0, 9999) if seed is None else seed))
         w, h = game.screen.get_size()
         self.size = (w, h)
         self.canvas = pygame.Surface((w, h))
@@ -151,6 +151,8 @@ class FightScene(Scene):
             self.popups.append([s["fight_parry"], ev.x, ev.y - 90, 0.9, PARRY_COL])
             if ev.defender == "player":
                 self.stats["parries"] += 1
+            else:   # Көлеңке ойыншыны «оқыды»
+                self.popups.append([s["fight_read"], ev.x, ev.y - 140, 1.2, (230, 90, 90)])
         elif ev.type == "block":
             self.shake.add(0.12)
             self._burst(ev.x, ev.y, 8, (200, 200, 210), 240)
@@ -307,6 +309,11 @@ class FightScene(Scene):
             col = (255, 255, 255) if pulse else ((230, 230, 245) if ok else (80, 80, 94))
             surface.blit(a.font(18, bold=ok).render(s[f"slot{i}"], True, col),
                          (40 + (i - 1) * 100, 100))
+        pred = getattr(self.fight.controllers.get(self.fight.enemy), "predictor", None)
+        if pred and len(pred.log) >= 4:     # Көлеңке сені қаншалықты үйренді
+            txt = a.font(18).render(
+                s["fight_ai_acc"].format(p=int(pred.accuracy * 100)), True, (150, 120, 215))
+            surface.blit(txt, (w - 40 - txt.get_width(), 82))
         if self.fight.can_restore and not self.result:
             hint = a.font(24, bold=True).render(s["fight_restore_hint"], True, (255, 245, 220))
             surface.blit(hint, hint.get_rect(center=(w // 2, 130)))

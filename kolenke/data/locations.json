@@ -17,6 +17,7 @@
         "label": "obj_door_back", "to": "corridor", "spawn": 1900 },
       { "id": "npc_darkhan", "kind": "npc", "x": 900, "w": 90,
         "label": "obj_talk_darkhan", "dialogue": "night1.json", "night": 1,
+        "fight": "darkhan", "fight_label": "obj_fight_darkhan",
         "accent": [230, 150, 50] }
     ]
   }

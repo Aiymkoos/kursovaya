@@ -18,5 +18,15 @@
   "obj_door_back": "Дәлізге шығу",
   "obj_talk_darkhan": "Дарханмен сөйлесу",
   "controls_explore": "A/D — жүру, E — әрекет, Tab — журнал, ESC — мәзір",
-  "night1_ready": "Дархан өзгеріп барады... Жекпе-жек келесі кезеңде."
+  "night1_ready": "Дархан өзгеріп барады... Жекпе-жек келесі кезеңде.",
+  "who_player": "Мен",
+  "fight_parry": "Парирлеу!",
+  "fight_memory": "Естелік",
+  "fight_controls": "A/D — жүру, J — жеңіл, K — ауыр, L — блок (дәл уақытта — парирлеу), ESC — шығу",
+  "fight_win": "Жеңіс",
+  "fight_lose": "Жеңілдің",
+  "fight_continue": "Space — жалғастыру",
+  "fight_retry": "Space — қайта бастау",
+  "obj_fight_darkhan": "Дарханмен шайқасу",
+  "night1_won": "Дархан жеңілді. Түн жалғасады..."
 }

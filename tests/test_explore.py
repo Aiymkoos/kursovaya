@@ -97,7 +97,10 @@ def test_door_transition_and_npc_dialogue(game):
         d.handle_action("choice1" if d.runner.has_choices else "next")
     assert game.scene is sc
     assert game.flags.get("night1_talk_done")
-    assert sc.near is None or sc.near.kind != "npc"  # сөйлесу қайталанбайды
+    assert sc.near.kind == "npc" and sc._fight_ready(sc.near)  # енді шайқас
+    sc.handle_action("interact")
+    from kolenke.scenes.fight import FightScene
+    assert isinstance(game.scene, FightScene)
 
 
 def test_held_movement(game):

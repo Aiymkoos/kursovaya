@@ -14,6 +14,7 @@ from kolenke.render.scenery import GROUND, build_scenery
 from kolenke.render.silhouette import draw_silhouette
 from kolenke.render.ui import draw_journal_counter, draw_night_indicator
 from kolenke.scenes.dialogue import DialogueScene, JournalScene
+from kolenke.scenes.fight import FightScene
 
 LOCATIONS_PATH = ROOT / "kolenke" / "data" / "locations.json"
 DATA_DIR = ROOT / "kolenke" / "data"
@@ -57,11 +58,19 @@ class ExploreScene(Scene):
     def interactables(self):
         out = []
         for o in self.loc.objects:
-            if o.kind == "npc" and self.game.flags.get(o.done_flag):
+            if o.kind == "npc" and self._npc_finished(o):
                 continue
             if abs(self.player.x - o.x) <= o.w / 2 + 40:
                 out.append(o)
         return sorted(out, key=lambda o: abs(self.player.x - o.x))
+
+    def _npc_finished(self, o):
+        if o.fight:
+            return bool(self.game.flags.get(o.fight + "_fight_won"))
+        return bool(self.game.flags.get(o.done_flag))
+
+    def _fight_ready(self, o):
+        return bool(o.fight) and bool(self.game.flags.get(o.done_flag))
 
     @property
     def near(self):
@@ -89,8 +98,11 @@ class ExploreScene(Scene):
             if obj.kind == "door":
                 self.fade.start(lambda o=obj: self._go(o))
             elif obj.kind == "npc":
-                self.game.push(DialogueScene(self.game, DATA_DIR / obj.dialogue,
-                                             night=obj.night))
+                if self._fight_ready(obj):
+                    self.game.push(FightScene(self.game, obj.fight, night=obj.night))
+                else:
+                    self.game.push(DialogueScene(self.game, DATA_DIR / obj.dialogue,
+                                                 night=obj.night))
 
     # --- логика ---
     def update(self, dt):
@@ -165,7 +177,10 @@ class ExploreScene(Scene):
         surface.blit(name, name.get_rect(midtop=(w // 2, 30)))
         hint = a.font(18).render(s["controls_explore"], True, GREY)
         surface.blit(hint, hint.get_rect(center=(w // 2, h - 30)))
-        if self.game.flags.get("night1_talk_done"):
+        if self.game.flags.get("darkhan_fight_won"):
+            msg = a.font(24).render(s["night1_won"], True, ACCENT)
+            surface.blit(msg, msg.get_rect(center=(w // 2, h - 80)))
+        elif self.game.flags.get("night1_talk_done"):
             msg = a.font(24).render(s["night1_ready"], True, ACCENT)
             surface.blit(msg, msg.get_rect(center=(w // 2, h - 80)))
         obj = self.near
@@ -173,7 +188,8 @@ class ExploreScene(Scene):
             bob = math.sin(self.t * 4) * 4
             x = obj.x - cam
             y = GROUND - 250 + bob
-            label = a.font(22).render(s[obj.label], True, WHITE)
+            key_name = obj.fight_label if self._fight_ready(obj) else obj.label
+            label = a.font(22).render(s[key_name], True, WHITE)
             box = pygame.Rect(0, 0, label.get_width() + 70, 40)
             box.midbottom = (x, y)
             pygame.draw.rect(surface, (8, 8, 12), box, border_radius=8)

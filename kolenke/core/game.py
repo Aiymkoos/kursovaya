@@ -1,6 +1,7 @@
 """Негізгі ойын циклі: 60 FPS, сахналар стегі, толық экран."""
 import pygame
 
+from kolenke.combat.fighter import load_combat_data
 from kolenke.core.assets import Assets, load_strings
 from kolenke.core.input import InputBuffer, action_for_key
 from kolenke.story.flags import Flags
@@ -19,6 +20,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.assets = Assets()
         self.strings = load_strings()
+        self.fight_moves = load_combat_data()["moves"]
         self.input = InputBuffer()
         self.scenes = []
         self.held = set()

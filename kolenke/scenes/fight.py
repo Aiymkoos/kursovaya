@@ -1,0 +1,271 @@
+"""Жекпе-жек сахнасы: кадр дәлдігіндегі ядро + кино-эффектілер.
+
+Логика бекітілген 60 Гц қадаммен (Fight.tick), сызу — кез келген FPS-те.
+Эффектілер: hitstop, экран дірілі, парирлеудегі баяулау, ұшқындар, жарық жарқылы.
+"""
+import math
+import random
+
+import pygame
+
+from kolenke.combat.ai_scripted import ScriptedAI
+from kolenke.combat.fight import Fight, PlayerController
+from kolenke.combat.hitbox import GROUND
+from kolenke.core.scene import Scene
+from kolenke.explore.locations import Location
+from kolenke.render.effects import ScreenShake
+from kolenke.render.fighter_draw import draw_fighter
+from kolenke.render.lighting import Lighting, make_vignette
+from kolenke.render.particles import Blizzard, ParticleSystem
+from kolenke.render.scenery import build_scenery
+
+TICK = 1 / 60
+WHITE = (230, 230, 230)
+GREY = (120, 120, 120)
+ACCENT = (200, 60, 60)
+SLOW_SCALE = 0.25
+SPARK = (255, 220, 150)
+PARRY_COL = (170, 220, 255)
+
+
+class FightScene(Scene):
+    def __init__(self, game, enemy="darkhan", night=1, ai=None, seed=None):
+        super().__init__(game)
+        self.enemy_name = enemy
+        self.night = night
+        self.ai_factory = ai or (lambda: ScriptedAI(seed=random.randint(0, 9999)
+                                                    if seed is None else seed))
+        w, h = game.screen.get_size()
+        self.size = (w, h)
+        self.canvas = pygame.Surface((w, h))
+        self.scenery = build_scenery(Location("arena", w, "", w // 2, []))
+        self.lighting = Lighting((w, h))
+        self.vignette = make_vignette((w, h))
+        self.blizzard = Blizzard(w, h, count=260, wind=-180)
+        self.particles = ParticleSystem(limit=500)
+        self.shake = ScreenShake()
+        self.t = 0.0
+        self._start()
+
+    def _start(self):
+        self.fight = Fight(self.enemy_name, enemy_controller=self.ai_factory())
+        self.fight.controllers[self.fight.player] = PlayerController(
+            self.fight.buffer, self.game.is_held)
+        self.acc = 0.0
+        self.slow_left = 0.0
+        self.time_scale = 1.0
+        self.flashes = []     # [x, y, radius, life, max_life, color]
+        self.popups = []      # [text, x, y, life, color]
+        self.trails = {"player": [], self.enemy_name: []}
+        self.result = None
+        self.result_delay = 0.0
+        self.stats = {"parries": 0, "hits_taken": 0, "hits_given": 0}
+
+    # --- енгізу ---
+    def handle_action(self, action):
+        if action == "menu":
+            self.game.pop()
+        elif self.result:
+            if action in ("next", "confirm"):
+                if self.result == "win":
+                    self.game.flags.set(self.enemy_name + "_fight_won")
+                    self.game.pop()
+                else:
+                    self._start()
+        elif action in ("light", "heavy", "block"):
+            self.fight.push_input(action)
+
+    # --- логика ---
+    def update(self, dt):
+        self.t += dt
+        self.shake.update(dt)
+        if self.slow_left > 0:
+            self.slow_left -= dt
+        self.time_scale = SLOW_SCALE if self.slow_left > 0 else min(
+            1.0, self.time_scale + dt * 3)
+        sim_dt = dt * self.time_scale
+        if not self.fight.over or self.result is None:
+            self.acc += sim_dt
+            n = 0
+            while self.acc >= TICK and n < 4:
+                self.acc -= TICK
+                n += 1
+                for ev in self.fight.tick():
+                    self._on_event(ev)
+        self.particles.update(sim_dt)
+        self.blizzard.update(sim_dt)
+        self._update_flashes(sim_dt)
+        self._update_popups(dt)
+        self._update_trails()
+        if self.fight.over and self.result is None:
+            self.result_delay += dt
+            if self.result_delay > 1.6:
+                self.result = "win" if self.fight.winner is self.fight.player else "lose"
+
+    def _update_flashes(self, dt):
+        for f in self.flashes:
+            f[3] -= dt
+        self.flashes = [f for f in self.flashes if f[3] > 0]
+
+    def _update_popups(self, dt):
+        for p in self.popups:
+            p[3] -= dt
+            p[2] -= 40 * dt
+        self.popups = [p for p in self.popups if p[3] > 0]
+
+    def _update_trails(self):
+        for name, fighter in ((self.fight.player.name, self.fight.player),
+                              (self.enemy_name, self.fight.enemy)):
+            tr = self.trails[name]
+            if fighter.phase == "active":
+                pass  # нүктелер сызу кезінде қосылады
+            elif tr:
+                tr.pop(0)
+
+    # --- эффектілер ---
+    def _on_event(self, ev):
+        s = self.game.strings
+        if ev.type == "parry":
+            self.shake.add(0.55)
+            self.slow_left = 0.7
+            self._burst(ev.x, ev.y, 34, PARRY_COL, 520)
+            self.flashes.append([ev.x, ev.y, 420, 0.35, 0.35, (170, 215, 255)])
+            self.popups.append([s["fight_parry"], ev.x, ev.y - 90, 0.9, PARRY_COL])
+            if ev.defender == "player":
+                self.stats["parries"] += 1
+        elif ev.type == "block":
+            self.shake.add(0.12)
+            self._burst(ev.x, ev.y, 8, (200, 200, 210), 240)
+            self.flashes.append([ev.x, ev.y, 180, 0.12, 0.12, (200, 200, 220)])
+        elif ev.type == "hit":
+            m = self.game.fight_moves[ev.move]
+            self.shake.add(m["shake"])
+            self._burst(ev.x, ev.y, 10 + int(m["damage"] * 0.8), SPARK, 380)
+            self._shadow_motes(ev.x, ev.y, 12 if ev.heavy else 6)
+            self.flashes.append([ev.x, ev.y, 260 if ev.heavy else 170, 0.18, 0.18,
+                                 (255, 190, 120)])
+            if ev.attacker == "player":
+                self.stats["hits_given"] += 1
+            else:
+                self.stats["hits_taken"] += 1
+        elif ev.type == "ko":
+            self.slow_left = 1.4
+            self.shake.add(0.8)
+            self._burst(ev.x, ev.y, 50, SPARK, 600)
+
+    def _burst(self, x, y, n, color, speed):
+        for _ in range(n):
+            a = random.uniform(0, math.tau)
+            v = random.uniform(speed * 0.3, speed)
+            self.particles.emit(x, y, math.cos(a) * v, math.sin(a) * v - 80,
+                                random.uniform(0.25, 0.6), random.choice((2, 3, 4)),
+                                color, 900)
+
+    def _shadow_motes(self, x, y, n):
+        for _ in range(n):
+            self.particles.emit(x + random.uniform(-14, 14), y + random.uniform(-20, 30),
+                                random.uniform(-30, 30), random.uniform(-110, -40),
+                                random.uniform(0.6, 1.1), 5, (150, 120, 215), -20)
+
+    # --- сызу ---
+    def draw(self, surface):
+        c = self.canvas
+        w, h = self.size
+        sc = self.scenery
+        c.blit(sc.surface, (0, 0))
+        for wnd in sc.windows:
+            prev = c.get_clip()
+            c.set_clip(wnd)
+            self.blizzard.draw(c, brightness=0.9)
+            c.set_clip(prev)
+            pygame.draw.line(c, (10, 12, 16), (wnd.centerx, wnd.top), (wnd.centerx, wnd.bottom), 4)
+            pygame.draw.line(c, (10, 12, 16), (wnd.left, wnd.centery), (wnd.right, wnd.centery), 4)
+
+        fp, fe = self.fight.player, self.fight.enemy
+        spec_p, spec_e = fp.spec, fe.spec
+        ap, ae = tuple(spec_p["accent"]), tuple(spec_e["accent"])
+        for fighter, accent in ((fe, ae), (fp, ap)):
+            reach = draw_fighter(c, fighter, accent, self.t, part="body")
+            self._push_trail(fighter, reach)
+        self._draw_trails(c)
+        self.particles.draw(c)
+
+        lights = list(sc.lights)
+        lights.append(dict(x=fp.x, y=GROUND - 150, r=330, color=(190, 215, 255),
+                           i=0.85, flicker=0, seed=0))
+        for x, y, r, life, mx, color in self.flashes:
+            lights.append(dict(x=x, y=y, r=r, color=color, i=min(1.0, life / mx * 1.3),
+                               flicker=0, seed=0))
+        self.lighting.ambient = sc.ambient
+        self.lighting.render(c, lights, 0, self.t)
+        for fighter, accent in ((fe, ae), (fp, ap)):
+            draw_fighter(c, fighter, accent, self.t, part="accent")
+        c.blit(self.vignette, (0, 0))
+        if self.time_scale < 0.6:  # баяулау: суық реңк
+            tint = pygame.Surface((w, h))
+            tint.fill((10, 22, 40))
+            tint.set_alpha(70)
+            c.blit(tint, (0, 0))
+
+        surface.fill((0, 0, 0))
+        surface.blit(c, self.shake.offset())
+        self._draw_hud(surface)
+
+    def _push_trail(self, fighter, reach):
+        tr = self.trails[fighter.name]
+        if fighter.phase == "active" and reach:
+            tr.append(reach[1])
+            del tr[:-9]
+
+    def _draw_trails(self, surface):
+        for tr in self.trails.values():
+            for i in range(1, len(tr)):
+                k = i / len(tr)
+                v = int(235 * k)
+                pygame.draw.line(surface, (v, v, min(255, v + 15)), tr[i - 1], tr[i],
+                                 max(1, int(7 * k)))
+
+    def _bar(self, surface, rect, frac, color, align_right=False):
+        pygame.draw.rect(surface, (14, 14, 20), rect, border_radius=4)
+        fill = rect.copy()
+        fill.width = int(rect.width * max(0.0, min(1.0, frac)))
+        if align_right:
+            fill.right = rect.right
+        pygame.draw.rect(surface, color, fill, border_radius=4)
+        pygame.draw.rect(surface, (70, 70, 84), rect, 2, border_radius=4)
+
+    def _draw_hud(self, surface):
+        s, a = self.game.strings, self.game.assets
+        w, h = self.size
+        fp, fe = self.fight.player, self.fight.enemy
+        ap, ae = tuple(fp.spec["accent"]), tuple(fe.spec["accent"])
+        font = a.font(20, bold=True)
+        surface.blit(font.render(s["who_player"], True, ap), (40, 22))
+        name = font.render(s["who_" + self.enemy_name], True, ae)
+        surface.blit(name, (w - 40 - name.get_width(), 22))
+        self._bar(surface, pygame.Rect(40, 52, 460, 22), fp.hp / fp.max_hp, ap)
+        self._bar(surface, pygame.Rect(w - 500, 52, 460, 22), fe.hp / fe.max_hp, ae, True)
+        mem = pygame.Rect(40, 82, 300, 12)  # естелік жолағы
+        self._bar(surface, mem, fp.memory / fp.max_memory, (230, 230, 245))
+        for i in (1, 2):
+            x = mem.x + mem.width * i // 3
+            pygame.draw.line(surface, (70, 70, 84), (x, mem.top), (x, mem.bottom), 2)
+        surface.blit(a.font(16).render(s["fight_memory"], True, GREY), (348, 79))
+        for text, x, y, life, color in self.popups:
+            img = a.font(30, bold=True).render(text, True, color)
+            img.set_alpha(int(255 * min(1.0, life / 0.4)))
+            surface.blit(img, img.get_rect(center=(x, y)))
+        surface.blit(a.font(18).render(s["fight_controls"], True, GREY),
+                     a.font(18).render(s["fight_controls"], True, GREY).get_rect(
+                         center=(w // 2, h - 28)))
+        if self.result:
+            dim = pygame.Surface((w, h))
+            dim.set_alpha(150)
+            surface.blit(dim, (0, 0))
+            title = s["fight_win"] if self.result == "win" else s["fight_lose"]
+            col = WHITE if self.result == "win" else ACCENT
+            t1 = a.font(72, bold=True).render(title, True, col)
+            surface.blit(t1, t1.get_rect(center=(w // 2, h // 2 - 30)))
+            hint = s["fight_continue"] if self.result == "win" else s["fight_retry"]
+            t2 = a.font(26).render(hint, True, GREY)
+            surface.blit(t2, t2.get_rect(center=(w // 2, h // 2 + 40)))

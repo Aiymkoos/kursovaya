@@ -18,6 +18,8 @@ class Obj:
     spawn: int = 0
     dialogue: str = ""
     night: int = 1
+    fight: str = ""
+    fight_label: str = ""
     accent: tuple = (230, 230, 230)
 
     @property

@@ -84,3 +84,40 @@ def test_fight_frame_budget(game):
     ms = (time.perf_counter() - t0) / 120 * 1000
     print(f"бой кадры: {ms:.2f} мс")
     assert ms < 33
+
+
+def test_restore_flow_sets_saved_flag_and_cuts_reserve(game):
+    game.journal.catalog["m"] = {"who": "darkhan", "text": "t"}
+    game.journal.add("m")
+    sc = make(game)
+    sc.fight.player.memory = 100
+    sc.fight.enemy.hp = 10
+    sc.handle_action("choice3")
+    for _ in range(200):
+        game.step(1 / 60)
+    assert sc.fight.outcome == "restore" and sc.result == "win"
+    sc.handle_action("next")
+    assert game.flags.get("darkhan_saved") and game.reserve == 75
+
+
+def test_kill_flow_sets_killed_flag_without_cost(game):
+    sc = make(game)
+    sc.fight.enemy.hp = 8
+    sc.fight.player.x, sc.fight.enemy.x = 500, 560
+    sc.handle_action("light")
+    for _ in range(240):
+        game.step(1 / 60)
+    sc.handle_action("next")
+    assert game.flags.get("darkhan_killed") and game.reserve == 100
+
+
+def test_tell_marker_only_with_discovered_detail(game):
+    sc = make(game)
+    sc.fight.enemy.start_move("overhead")
+    sc.fight.enemy.frame = 10
+    surf = pygame.Surface((1280, 720), pygame.SRCALPHA)
+    sc._draw_tell(surf, (230, 150, 50))
+    assert surf.get_bounding_rect().width == 0      # деталь белгісіз — белгі жоқ
+    game.flags.set("knows_overhead")
+    sc._draw_tell(surf, (230, 150, 50))
+    assert surf.get_bounding_rect().width > 0

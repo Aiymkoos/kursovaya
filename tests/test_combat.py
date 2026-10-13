@@ -113,3 +113,81 @@ def test_scripted_ai_attacks_eventually():
     f.player.x, f.enemy.x = 500, 700
     ev = run(f, 600)
     assert any(e.attacker == "darkhan" for e in ev)
+
+
+# ---------- 4-кезең: естеліктер, дайындық белгілері, таңдау әсері ----------
+from kolenke.combat.fight import MEMORY_COST
+from kolenke.combat.setup import fight_params, known_tells
+from kolenke.story.flags import Flags
+from kolenke.story.journal import Journal
+
+
+def mem_duel(plan, memory=100, entries=2, **kw):
+    f = Fight(enemy_controller=Script({}), player_controller=Script(plan),
+              start_memory=memory, entries=entries, **kw)
+    f.player.x, f.enemy.x = 500, 600
+    return f
+
+
+def test_memory_heal_costs_memory_and_heals():
+    f = mem_duel({1: "mem1"})
+    f.player.hp = 50
+    ev = run(f, 3)
+    assert types(ev) == ["mem_heal"] and f.player.hp == 75
+    assert f.player.memory == 100 - MEMORY_COST
+
+
+def test_memory_blocked_when_not_enough_memory():
+    f = mem_duel({1: "mem1"}, memory=10)
+    f.player.hp = 50
+    assert run(f, 3) == [] and f.player.hp == 50
+
+
+def test_focus_extends_parry_window_then_expires():
+    f = mem_duel({1: "mem2"}, entries=1)
+    run(f, 2)
+    assert f.player.parry_frames == 8 + 6 and f.focus_left > 0
+    run(f, 300)
+    assert f.player.parry_frames == 8 and f.focus_left == 0
+
+
+def test_restore_needs_low_enemy_hp_and_a_known_memory():
+    f = mem_duel({5: "mem3"})
+    run(f, 8)
+    assert not f.over  # жау әлі күшті
+    f2 = mem_duel({5: "mem3"})
+    f2.enemy.hp = 10
+    ev = run(f2, 8)
+    assert "restore" in types(ev) and f2.over and f2.outcome == "restore"
+    f3 = mem_duel({5: "mem3"}, entries=0)  # адам туралы ештеңе білмейді
+    f3.enemy.hp = 10
+    run(f3, 8)
+    assert not f3.over
+
+
+def test_kill_outcome():
+    f = duel({}, {})
+    f.enemy.hp = 5
+    f.controllers[f.player] = Script({1: "light"})
+    run(f, 30)
+    assert f.outcome == "kill"
+
+
+def test_unknown_tell_shortens_startup():
+    known = Fight(known_tells={"overhead", "slash"})
+    blind = Fight(known_tells=set())
+    assert blind.enemy.moves["overhead"]["startup"] < known.enemy.moves["overhead"]["startup"]
+    assert blind.enemy.moves["overhead"]["startup"] == int(34 * 0.7)
+    assert Fight().enemy.moves["overhead"]["startup"] == 34
+
+
+def test_choices_map_to_fight_params():
+    cat = {"m_overhead": {"who": "darkhan", "text": "t"}}
+    flags, journal = Flags({"knows_overhead": True, "darkhan_called_name": True}), Journal(cat)
+    journal.add("m_overhead")
+    data = Fight().data
+    assert known_tells(data, "darkhan", flags) == {"overhead"}
+    p = fight_params(flags, journal, reserve=80, enemy="darkhan", data=data)
+    assert p["start_memory"] == 40 and p["entries"] == 1 and p["enemy_hp_mult"] == 0.85
+    p2 = fight_params(Flags(), Journal(cat), 100, "darkhan", data)
+    assert p2["known_tells"] == set() and p2["enemy_hp_mult"] == 1.0

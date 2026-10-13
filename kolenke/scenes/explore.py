@@ -178,7 +178,8 @@ class ExploreScene(Scene):
         hint = a.font(18).render(s["controls_explore"], True, GREY)
         surface.blit(hint, hint.get_rect(center=(w // 2, h - 30)))
         if self.game.flags.get("darkhan_fight_won"):
-            msg = a.font(24).render(s["night1_won"], True, ACCENT)
+            key = "night1_saved" if self.game.flags.get("darkhan_saved") else "night1_won"
+            msg = a.font(24).render(s[key], True, ACCENT)
             surface.blit(msg, msg.get_rect(center=(w // 2, h - 80)))
         elif self.game.flags.get("night1_talk_done"):
             msg = a.font(24).render(s["night1_ready"], True, ACCENT)

@@ -116,7 +116,7 @@ def test_night1_hands_path_reveals_tap():
 def test_night1_sleep_path_learns_nothing():
     f, j = play([2, 1])
     assert len(j) == 0 and not f.get("knows_overhead")
-    assert f.get("called_name") is False
+    assert f.get("darkhan_called_name") is False
 
 
 def test_dialogue_scene_runs_and_pops():

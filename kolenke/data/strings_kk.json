@@ -22,11 +22,20 @@
   "who_player": "Мен",
   "fight_parry": "Парирлеу!",
   "fight_memory": "Естелік",
-  "fight_controls": "A/D — жүру, J — жеңіл, K — ауыр, L — блок (дәл уақытта — парирлеу), ESC — шығу",
+  "fight_controls": "A/D — жүру, J/K — соққы, L — блок (дәл сәтте — парирлеу), 1–3 — естелік, ESC — шығу",
   "fight_win": "Жеңіс",
   "fight_lose": "Жеңілдің",
   "fight_continue": "Space — жалғастыру",
   "fight_retry": "Space — қайта бастау",
   "obj_fight_darkhan": "Дарханмен шайқасу",
-  "night1_won": "Дархан жеңілді. Түн жалғасады..."
+  "night1_won": "Дархан жеңілді. Түн жалғасады...",
+  "fight_heal": "Жылу естелігі",
+  "fight_focus": "Зейін",
+  "fight_restore": "Адамдық кейпіне оралды",
+  "slot1": "1 Жылу",
+  "slot2": "2 Зейін",
+  "slot3": "3 Қайтару",
+  "fight_win_restore": "Адам қайтып келді",
+  "night1_saved": "Дархан қайтып келді. Ол қауіпсіз.",
+  "fight_restore_hint": "3 — естелік арқылы адамды қайтару"
 }

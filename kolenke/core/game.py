@@ -31,6 +31,7 @@ class Game:
         """Жаңа ойын: флагтар мен журнал тазаланады."""
         self.flags = Flags()
         self.journal = Journal({})
+        self.reserve = 100   # естелік қоры: адамды қайтарған сайын азаяды
 
     def _make_screen(self):
         flags = pygame.SCALED | (pygame.FULLSCREEN if self.fullscreen else 0)

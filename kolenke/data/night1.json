@@ -107,7 +107,7 @@
       "speaker": "me",
       "text": "Көлеңке оны жұтып жатыр. Не істеймін?",
       "choices": [
-        { "text": "Дархан, мені тыңда! Сен — Дарханссың!", "set": { "called_name": true }, "next": "transform" },
+        { "text": "Дархан, мені тыңда! Сен — Дарханссың!", "set": { "darkhan_called_name": true }, "next": "transform" },
         { "text": "Артқа шегін, жақындама!", "next": "transform" }
       ]
     },

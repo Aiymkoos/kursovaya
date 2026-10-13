@@ -9,7 +9,8 @@ import random
 import pygame
 
 from kolenke.combat.ai_scripted import ScriptedAI
-from kolenke.combat.fight import Fight, PlayerController
+from kolenke.combat.fight import MEMORY_COST, Fight, PlayerController
+from kolenke.combat.setup import RESTORE_RESERVE_COST, fight_params
 from kolenke.combat.hitbox import GROUND
 from kolenke.core.scene import Scene
 from kolenke.explore.locations import Location
@@ -29,8 +30,10 @@ PARRY_COL = (170, 220, 255)
 
 
 class FightScene(Scene):
-    def __init__(self, game, enemy="darkhan", night=1, ai=None, seed=None):
+    def __init__(self, game, enemy="darkhan", night=1, ai=None, seed=None,
+                 tells_enabled=True):
         super().__init__(game)
+        self.tells_enabled = tells_enabled
         self.enemy_name = enemy
         self.night = night
         self.ai_factory = ai or (lambda: ScriptedAI(seed=random.randint(0, 9999)
@@ -48,7 +51,10 @@ class FightScene(Scene):
         self._start()
 
     def _start(self):
-        self.fight = Fight(self.enemy_name, enemy_controller=self.ai_factory())
+        params = fight_params(self.game.flags, self.game.journal, self.game.reserve,
+                              self.enemy_name)
+        self.tells_visible = self.tells_enabled
+        self.fight = Fight(self.enemy_name, enemy_controller=self.ai_factory(), **params)
         self.fight.controllers[self.fight.player] = PlayerController(
             self.fight.buffer, self.game.is_held)
         self.acc = 0.0
@@ -68,12 +74,24 @@ class FightScene(Scene):
         elif self.result:
             if action in ("next", "confirm"):
                 if self.result == "win":
-                    self.game.flags.set(self.enemy_name + "_fight_won")
+                    self._finish()
                     self.game.pop()
                 else:
                     self._start()
         elif action in ("light", "heavy", "block"):
             self.fight.push_input(action)
+        elif action in ("choice1", "choice2", "choice3"):
+            self.fight.push_input("mem" + action[-1])
+
+    def _finish(self):
+        """Нәтижені флагтарға жазу: өлтіру немесе адамдық кейіпке қайтару."""
+        f, name = self.game.flags, self.enemy_name
+        f.set(name + "_fight_won")
+        if self.fight.outcome == "restore":
+            f.set(name + "_saved")
+            self.game.reserve = max(0, self.game.reserve - RESTORE_RESERVE_COST)
+        else:
+            f.set(name + "_killed")
 
     # --- логика ---
     def update(self, dt):
@@ -99,7 +117,7 @@ class FightScene(Scene):
         self._update_trails()
         if self.fight.over and self.result is None:
             self.result_delay += dt
-            if self.result_delay > 1.6:
+            if self.result_delay > (0.9 if self.fight.outcome == "restore" else 1.6):
                 self.result = "win" if self.fight.winner is self.fight.player else "lose"
 
     def _update_flashes(self, dt):
@@ -148,6 +166,18 @@ class FightScene(Scene):
                 self.stats["hits_given"] += 1
             else:
                 self.stats["hits_taken"] += 1
+        elif ev.type == "mem_heal":
+            self._burst(ev.x, ev.y, 18, (255, 240, 200), 160)
+            self.flashes.append([ev.x, ev.y, 300, 0.5, 0.5, (255, 235, 190)])
+            self.popups.append([s["fight_heal"], ev.x, ev.y - 70, 0.9, (255, 240, 200)])
+        elif ev.type == "mem_focus":
+            self.flashes.append([ev.x, ev.y, 300, 0.4, 0.4, (170, 215, 255)])
+            self.popups.append([s["fight_focus"], ev.x, ev.y - 70, 0.9, PARRY_COL])
+        elif ev.type == "restore":
+            self.slow_left = 1.2
+            self.flashes.append([ev.x, ev.y, 520, 1.0, 1.0, (255, 245, 220)])
+            self._burst(ev.x, ev.y, 60, (255, 245, 220), 260)
+            self.popups.append([s["fight_restore"], ev.x, ev.y - 90, 1.6, (255, 245, 220)])
         elif ev.type == "ko":
             self.slow_left = 1.4
             self.shake.add(0.8)
@@ -200,6 +230,7 @@ class FightScene(Scene):
         self.lighting.render(c, lights, 0, self.t)
         for fighter, accent in ((fe, ae), (fp, ap)):
             draw_fighter(c, fighter, accent, self.t, part="accent")
+        self._draw_tell(c, ae)
         c.blit(self.vignette, (0, 0))
         if self.time_scale < 0.6:  # баяулау: суық реңк
             tint = pygame.Surface((w, h))
@@ -210,6 +241,25 @@ class FightScene(Scene):
         surface.fill((0, 0, 0))
         surface.blit(c, self.shake.offset())
         self._draw_hud(surface)
+
+    def _draw_tell(self, surface, accent):
+        """Дайындық қимылының белгісі: сөйлесуде байқалған детальге ғана көрінеді."""
+        e = self.fight.enemy
+        m = e.move
+        if not (self.tells_visible and m and e.phase == "startup"):
+            return
+        flag = m.get("tell_flag")
+        if flag and not self.game.flags.get(flag):
+            return
+        su = m["startup"]
+        left = su - e.frame
+        ready = left <= self.fight.player.parry_frames   # L басатын сәт
+        col = (255, 255, 255) if ready else accent
+        cx, cy = int(e.x), GROUND - 215
+        r = int(46 * (1 - e.frame / su)) + 12
+        pygame.draw.circle(surface, col, (cx, cy), r, 3)
+        mark = self.game.assets.font(30, bold=True).render("!", True, col)
+        surface.blit(mark, mark.get_rect(center=(cx, cy)))
 
     def _push_trail(self, fighter, reach):
         tr = self.trails[fighter.name]
@@ -251,6 +301,15 @@ class FightScene(Scene):
             x = mem.x + mem.width * i // 3
             pygame.draw.line(surface, (70, 70, 84), (x, mem.top), (x, mem.bottom), 2)
         surface.blit(a.font(16).render(s["fight_memory"], True, GREY), (348, 79))
+        for i in (1, 2, 3):
+            ok = self.fight.usable(i)
+            pulse = i == 3 and ok and int(self.t * 6) % 2 == 0
+            col = (255, 255, 255) if pulse else ((230, 230, 245) if ok else (80, 80, 94))
+            surface.blit(a.font(18, bold=ok).render(s[f"slot{i}"], True, col),
+                         (40 + (i - 1) * 100, 100))
+        if self.fight.can_restore and not self.result:
+            hint = a.font(24, bold=True).render(s["fight_restore_hint"], True, (255, 245, 220))
+            surface.blit(hint, hint.get_rect(center=(w // 2, 130)))
         for text, x, y, life, color in self.popups:
             img = a.font(30, bold=True).render(text, True, color)
             img.set_alpha(int(255 * min(1.0, life / 0.4)))
@@ -262,7 +321,8 @@ class FightScene(Scene):
             dim = pygame.Surface((w, h))
             dim.set_alpha(150)
             surface.blit(dim, (0, 0))
-            title = s["fight_win"] if self.result == "win" else s["fight_lose"]
+            title = (s["fight_win_restore"] if self.fight.outcome == "restore"
+                     else s["fight_win"]) if self.result == "win" else s["fight_lose"]
             col = WHITE if self.result == "win" else ACCENT
             t1 = a.font(72, bold=True).render(title, True, col)
             surface.blit(t1, t1.get_rect(center=(w // 2, h // 2 - 30)))

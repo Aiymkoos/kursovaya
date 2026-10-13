@@ -3,6 +3,8 @@ import pygame
 
 from kolenke.core.scene import Scene
 from kolenke.core.text import wrap_text
+from kolenke.render.lighting import make_vignette
+from kolenke.render.particles import Blizzard
 from kolenke.story.graph import DialogueGraph, DialogueRunner
 
 ACCENT = (200, 60, 60)
@@ -51,6 +53,9 @@ class DialogueScene(Scene):
         self.shown = 0.0       # көрсетілген таңба саны (теру эффектісі)
         self.notice_time = 0.0  # «жаңа жазба» хабарының уақыты
         self._known = len(game.journal)
+        w, h = game.screen.get_size()
+        self.blizzard = Blizzard(w, h, count=120, wind=-200, seed=3)
+        self.vignette = make_vignette((w, h))
         self._reset_text()
 
     def _reset_text(self):
@@ -78,6 +83,7 @@ class DialogueScene(Scene):
             if not self.text_done:
                 self.shown = len(self.text)
             elif r.finished:
+                self.game.flags.set(self.graph.id + "_talk_done")
                 self.game.pop()
             elif r.advance():
                 self._reset_text()
@@ -88,10 +94,13 @@ class DialogueScene(Scene):
     def update(self, dt):
         self.shown = min(len(self.text), self.shown + CHARS_PER_SEC * dt)
         self.notice_time = max(0.0, self.notice_time - dt)
+        self.blizzard.update(dt)
 
     def draw(self, surface):
         s, a, r = self.game.strings, self.game.assets, self.runner
         w, h = surface.get_size()
+        self.blizzard.draw(surface, brightness=0.3)
+        surface.blit(self.vignette, (0, 0))
         night = a.font(22).render(s["night_label"].format(n=self.night), True, GREY)
         surface.blit(night, (40, 30))
         j = a.font(22).render(f"Tab · {len(self.game.journal)}", True, GREY)

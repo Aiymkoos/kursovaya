@@ -1,9 +1,8 @@
 """Басты мәзір және уақытша 1-түн сахнасы."""
 import pygame
 
-from kolenke.core.assets import ROOT
 from kolenke.core.scene import Scene
-from kolenke.scenes.dialogue import DialogueScene
+from kolenke.scenes.explore import ExploreScene
 
 ACCENT = (200, 60, 60)  # бір акцентті түс
 WHITE = (230, 230, 230)
@@ -22,7 +21,7 @@ class MenuScene(Scene):
 
     def _new_game(self):
         self.game.new_game_state()
-        self.game.push(DialogueScene(self.game, ROOT / "kolenke" / "data" / "night1.json", night=1))
+        self.game.push(ExploreScene(self.game))
 
     def handle_action(self, action):
         if action == "up":

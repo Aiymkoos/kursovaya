@@ -1,0 +1,23 @@
+{
+  "corridor": {
+    "width": 2400,
+    "name": "loc_corridor",
+    "start": 300,
+    "objects": [
+      { "id": "door_darkhan", "kind": "door", "x": 1900, "w": 120,
+        "label": "obj_door_darkhan", "to": "darkhan_room", "spawn": 220 }
+    ]
+  },
+  "darkhan_room": {
+    "width": 1280,
+    "name": "loc_darkhan_room",
+    "start": 220,
+    "objects": [
+      { "id": "door_back", "kind": "door", "x": 120, "w": 120,
+        "label": "obj_door_back", "to": "corridor", "spawn": 1900 },
+      { "id": "npc_darkhan", "kind": "npc", "x": 900, "w": 90,
+        "label": "obj_talk_darkhan", "dialogue": "night1.json", "night": 1,
+        "accent": [230, 150, 50] }
+    ]
+  }
+}

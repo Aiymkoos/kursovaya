@@ -21,6 +21,7 @@ class Game:
         self.strings = load_strings()
         self.input = InputBuffer()
         self.scenes = []
+        self.held = set()
         self.running = True
         self.new_game_state()
 
@@ -54,16 +55,25 @@ class Game:
         self.running = False
 
     # --- цикл ---
+    def is_held(self, action):
+        """Перне қазір басулы ма (үздіксіз қозғалыс үшін)."""
+        return action in self.held
+
     def process_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.quit()
+            elif event.type == pygame.KEYUP:
+                action = action_for_key(event.key)
+                if action:
+                    self.held.discard(action)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_F11:
                     self.toggle_fullscreen()
                     continue
                 action = action_for_key(event.key)
                 if action:
+                    self.held.add(action)
                     self.input.push(action)
                     if self.scene:
                         self.scene.handle_action(action)

@@ -9,7 +9,7 @@ import pytest
 from kolenke.core.assets import load_strings
 from kolenke.core.game import Game
 from kolenke.core.input import InputBuffer, action_for_key
-from kolenke.scenes.dialogue import DialogueScene
+from kolenke.scenes.explore import ExploreScene
 from kolenke.scenes.menu import MenuScene
 
 
@@ -48,10 +48,10 @@ def test_kazakh_glyphs_in_font(game):
     assert "Көлеңке" == load_strings()["title"]
 
 
-def test_menu_starts_night1_and_returns(game):
+def test_menu_starts_exploration_and_returns(game):
     game.push(MenuScene(game))
     game.scene.handle_action("confirm")  # «Жаңа ойын»
-    assert isinstance(game.scene, DialogueScene)
+    assert isinstance(game.scene, ExploreScene)
     game.scene.handle_action("menu")
     assert isinstance(game.scene, MenuScene)
     game.step(1 / 60)  # кадр қатесіз сызылады

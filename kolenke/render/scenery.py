@@ -1,0 +1,132 @@
+"""Локация декорациялары: бір рет алдын ала сызылады (60 FPS үшін)."""
+from dataclasses import dataclass, field
+
+import pygame
+
+H = 720
+GROUND = 640       # кейіпкер табаны тұратын сызық
+WALL_BOTTOM = 560
+
+
+@dataclass
+class Scenery:
+    surface: pygame.Surface
+    windows: list = field(default_factory=list)   # әлем координатасындағы Rect
+    lights: list = field(default_factory=list)    # Lighting.render үшін
+    pillars: list = field(default_factory=list)   # алдыңғы план бағандары (x)
+    ambient: tuple = (16, 18, 28)
+
+
+def _gradient(width, y0, y1, top, bottom, surf):
+    for y in range(y0, y1):
+        k = (y - y0) / max(1, y1 - y0 - 1)
+        c = tuple(int(top[i] + (bottom[i] - top[i]) * k) for i in range(3))
+        pygame.draw.line(surf, c, (0, y), (width, y))
+
+
+def _floor(surf, width):
+    _gradient(width, WALL_BOTTOM, H, (38, 30, 27), (14, 11, 10), surf)
+    y, step = WALL_BOTTOM + 8, 10
+    while y < H:
+        pygame.draw.line(surf, (10, 8, 8), (0, y), (width, y))
+        y += step
+        step += 6
+    for x in range(0, width, 170):
+        pygame.draw.line(surf, (12, 10, 9), (x, WALL_BOTTOM), (x - 60, H))
+    pygame.draw.line(surf, (60, 50, 46), (0, WALL_BOTTOM), (width, WALL_BOTTOM), 3)
+
+
+def _window(surf, rect, windows):
+    glass = pygame.Rect(rect)
+    pygame.draw.rect(surf, (8, 10, 14), glass.inflate(16, 16), border_radius=4)
+    for y in range(glass.top, glass.bottom):
+        k = (y - glass.top) / glass.height
+        c = (int(22 + 34 * k), int(38 + 44 * k), int(66 + 52 * k))
+        pygame.draw.line(surf, c, (glass.left, y), (glass.right - 1, y))
+    windows.append(glass)
+
+
+def _door(surf, obj):
+    x, w = obj.x, obj.w
+    rect = pygame.Rect(0, 0, w, 330)
+    rect.midbottom = (x, WALL_BOTTOM)
+    pygame.draw.rect(surf, (12, 9, 8), rect.inflate(18, 14), border_radius=3)
+    pygame.draw.rect(surf, (62, 42, 33), rect)
+    for panel in (rect.inflate(-34, -190).move(0, -80), rect.inflate(-34, -190).move(0, 85)):
+        pygame.draw.rect(surf, (48, 32, 26), panel)
+        pygame.draw.rect(surf, (74, 52, 42), panel, 2)
+    pygame.draw.circle(surf, (170, 140, 80), (rect.right - 16, rect.centery + 10), 6)
+    plate = pygame.Rect(0, 0, 38, 20)
+    plate.center = (rect.centerx, rect.top + 26)
+    pygame.draw.rect(surf, (150, 130, 90), plate)
+
+
+def _lamp_fixture(surf, x, y=64):
+    pygame.draw.line(surf, (10, 10, 12), (x, 40), (x, y), 3)
+    pygame.draw.rect(surf, (200, 190, 150), pygame.Rect(x - 22, y, 44, 10), border_radius=4)
+
+
+def build_corridor(loc, objects):
+    w = loc.width
+    surf = pygame.Surface((w, H))
+    _gradient(w, 0, WALL_BOTTOM, (44, 52, 64), (26, 30, 38), surf)
+    pygame.draw.rect(surf, (12, 14, 18), (0, 0, w, 60))
+    for x in range(0, w, 300):
+        pygame.draw.rect(surf, (18, 20, 25), (x, 0, 14, 60))
+    pygame.draw.rect(surf, (30, 36, 45), (0, 390, w, WALL_BOTTOM - 390))
+    pygame.draw.line(surf, (70, 80, 92), (0, 390), (w, 390), 3)
+    _floor(surf, w)
+    windows = []
+    for x in (700, 1260):
+        _window(surf, pygame.Rect(x - 90, 130, 180, 220), windows)
+    lights, pillars = [], [1500]
+    for x, flick, power in ((450, 0.8, 1), (1100, 0, 0), (1700, 0.35, 1), (2200, 0.1, 1)):
+        _lamp_fixture(surf, x)
+        if power:
+            lights.append(dict(x=x, y=100, r=380, color=(255, 214, 160),
+                               i=1.0, flicker=flick, seed=x))
+    for o in objects:
+        if o.kind == "door":
+            _door(surf, o)
+            lights.append(dict(x=o.x, y=WALL_BOTTOM - 20, r=190, color=(255, 190, 110),
+                               i=0.8, flicker=0.15, seed=o.x))
+    for wnd in windows:  # терезеден түсетін суық жарық
+        lights.append(dict(x=wnd.centerx, y=wnd.centery + 60, r=300,
+                           color=(110, 150, 220), i=0.75, flicker=0, seed=0))
+    return Scenery(surf, windows, lights, pillars, ambient=(46, 54, 78))
+
+
+def build_room(loc, objects):
+    w = loc.width
+    surf = pygame.Surface((w, H))
+    _gradient(w, 0, WALL_BOTTOM, (52, 44, 50), (30, 26, 32), surf)
+    pygame.draw.rect(surf, (14, 12, 16), (0, 0, w, 40))
+    _floor(surf, w)
+    windows = []
+    _window(surf, pygame.Rect(540, 120, 200, 240), windows)
+    # кереует
+    pygame.draw.rect(surf, (20, 18, 24), (300, 470, 230, 90))
+    pygame.draw.rect(surf, (36, 40, 62), (306, 464, 218, 40), border_radius=6)
+    pygame.draw.rect(surf, (14, 12, 16), (292, 420, 16, 140))
+    # үстел мен шам
+    pygame.draw.rect(surf, (28, 22, 20), (1010, 500, 160, 14))
+    pygame.draw.rect(surf, (20, 16, 14), (1020, 514, 12, 46))
+    pygame.draw.rect(surf, (20, 16, 14), (1148, 514, 12, 46))
+    pygame.draw.rect(surf, (230, 200, 120), (1080, 470, 14, 30), border_radius=3)
+    # сөре
+    for i in range(3):
+        pygame.draw.rect(surf, (22, 18, 18), (860, 250 + i * 58, 200, 8))
+        for j in range(7):
+            pygame.draw.rect(surf, [(80, 50, 46), (50, 64, 80), (90, 80, 52)][(i + j) % 3],
+                             (868 + j * 26, 214 + i * 58, 18, 36))
+    lights = [dict(x=1087, y=470, r=420, color=(255, 190, 110), i=1.0, flicker=0.25, seed=3),
+              dict(x=640, y=330, r=320, color=(110, 150, 220), i=0.7, flicker=0, seed=0)]
+    for o in objects:
+        if o.kind == "door":
+            _door(surf, o)
+    return Scenery(surf, windows, lights, [], ambient=(58, 50, 66))
+
+
+def build_scenery(loc):
+    builder = build_corridor if loc.id == "corridor" else build_room
+    return builder(loc, loc.objects)

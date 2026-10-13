@@ -17,15 +17,27 @@ class Obj:
     to: str = ""
     spawn: int = 0
     dialogue: str = ""
-    night: int = 1
-    fight: str = ""
-    fight_label: str = ""
+    night: int = 0          # 0 — әрқашан белсенді; N — тек N-түнде
+    who: str = ""           # NPC кейіпкер id (флагтар: <who>_saved/_killed)
+    fight: str = ""         # "darkhan" немесе "@флаг1,флаг2" (ретпен шайқас)
     accent: tuple = (230, 230, 230)
 
     @property
     def done_flag(self):
         """Диалог аяқталғанда қойылатын флаг атауы."""
         return self.dialogue.replace(".json", "") + "_talk_done"
+
+    def active(self, night):
+        return self.night in (0, night)
+
+    def enemies(self, flags):
+        """Осы NPC-мен өтетін шайқастар тізімі (диалогтан кейін анықталады)."""
+        if not self.fight:
+            return []
+        if self.fight.startswith("@"):
+            names = [flags.get(k, "") for k in self.fight[1:].split(",")]
+            return [n for n in names if n]
+        return [self.fight]
 
 
 @dataclass

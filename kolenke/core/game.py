@@ -5,6 +5,7 @@ from kolenke.combat.fighter import load_combat_data
 from kolenke.core.assets import Assets, load_strings
 from kolenke.core.input import InputBuffer, action_for_key
 from kolenke.story.flags import Flags
+from kolenke.story.catalog import load_catalog
 from kolenke.story.journal import Journal
 
 LOGICAL_SIZE = (1280, 720)  # ішкі ажыратымдылық, экранға масштабталады
@@ -27,11 +28,22 @@ class Game:
         self.running = True
         self.new_game_state()
 
+    def start_night(self, n):
+        self.night = n
+        self.corruption = 0.25 if n == 3 else 0.0
+
+    def tick_corruption(self, dt):
+        """3-түнде уақыт өткен сайын кейіпкер айнала түседі."""
+        if self.night == 3:
+            self.corruption = min(0.92, self.corruption + 0.004 * dt)
+
     def new_game_state(self):
         """Жаңа ойын: флагтар мен журнал тазаланады."""
         self.flags = Flags()
-        self.journal = Journal({})
+        self.journal = Journal(load_catalog())
         self.reserve = 100   # естелік қоры: адамды қайтарған сайын азаяды
+        self.night = 1       # қазіргі түн (1–3)
+        self.corruption = 0.0  # 3-түнде басты кейіпкердің өзі айнала бастайды (0..1)
 
     def _make_screen(self):
         flags = pygame.SCALED | (pygame.FULLSCREEN if self.fullscreen else 0)
@@ -53,6 +65,15 @@ class Game:
     def pop(self):
         if self.scenes:
             self.scenes.pop().on_exit()
+        if self.scene:
+            self.scene.on_resume()
+
+    def pop_to_menu(self):
+        """Мәзірге оралу (стектегі бірінші сахна)."""
+        while len(self.scenes) > 1:
+            self.scenes.pop().on_exit()
+        if self.scene:
+            self.scene.on_resume()
 
     def quit(self):
         self.running = False

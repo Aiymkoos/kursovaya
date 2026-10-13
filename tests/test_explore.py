@@ -28,8 +28,11 @@ def game():
 
 def test_locations_valid_and_doors_link_back():
     locs = load_locations(LOCS)
-    assert locs["corridor"].objects[0].to == "darkhan_room"
-    assert any(o.to == "corridor" for o in locs["darkhan_room"].objects)
+    doors = {o.id: o for o in locs["corridor"].objects}
+    assert doors["door_darkhan"].to == "darkhan_room" and doors["door_darkhan"].night == 1
+    assert doors["door_girls"].night == 2 and doors["door_bekzat"].night == 3
+    for room in ("darkhan_room", "girls_room", "bekzat_room"):
+        assert any(o.to == "corridor" for o in locs[room].objects)
 
 
 def test_location_validation(tmp_path):
@@ -79,7 +82,7 @@ def test_door_transition_and_npc_dialogue(game):
     sc = ExploreScene(game)
     game.push(sc)
     sc.player.x = 1900
-    assert sc.near.id == "door_darkhan"
+    assert sc.night == 1 and sc.near.id == "door_darkhan"
     sc.handle_action("interact")
     for _ in range(60):
         game.step(1 / 60)
@@ -97,7 +100,8 @@ def test_door_transition_and_npc_dialogue(game):
         d.handle_action("choice1" if d.runner.has_choices else "next")
     assert game.scene is sc
     assert game.flags.get("night1_talk_done")
-    assert sc.near.kind == "npc" and sc._fight_ready(sc.near)  # енді шайқас
+    assert sc.near.kind == "npc" and sc._talk_done(sc.near)
+    assert sc._next_enemy(sc.near) == "darkhan"  # енді шайқас
     sc.handle_action("interact")
     from kolenke.scenes.fight import FightScene
     assert isinstance(game.scene, FightScene)

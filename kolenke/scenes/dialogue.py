@@ -3,6 +3,7 @@ import pygame
 
 from kolenke.core.scene import Scene
 from kolenke.core.text import wrap_text
+from kolenke.render.corruption import draw_corruption, hidden
 from kolenke.render.lighting import make_vignette
 from kolenke.render.particles import Blizzard
 from kolenke.story.graph import DialogueGraph, DialogueRunner
@@ -50,6 +51,7 @@ class DialogueScene(Scene):
         self.graph = DialogueGraph.load(graph_path)
         game.journal.catalog.update(self.graph.memories)
         self.runner = DialogueRunner(self.graph, game.flags, game.journal)
+        self.t = 0.0
         self.shown = 0.0       # көрсетілген таңба саны (теру эффектісі)
         self.notice_time = 0.0  # «жаңа жазба» хабарының уақыты
         self._known = len(game.journal)
@@ -92,19 +94,25 @@ class DialogueScene(Scene):
                 self._reset_text()
 
     def update(self, dt):
+        self.t += dt
         self.shown = min(len(self.text), self.shown + CHARS_PER_SEC * dt)
         self.notice_time = max(0.0, self.notice_time - dt)
         self.blizzard.update(dt)
+        self.game.tick_corruption(dt)
 
     def draw(self, surface):
         s, a, r = self.game.strings, self.game.assets, self.runner
         w, h = surface.get_size()
         self.blizzard.draw(surface, brightness=0.3)
         surface.blit(self.vignette, (0, 0))
-        night = a.font(22).render(s["night_label"].format(n=self.night), True, GREY)
-        surface.blit(night, (40, 30))
-        j = a.font(22).render(f"Tab · {len(self.game.journal)}", True, GREY)
-        surface.blit(j, (w - j.get_width() - 40, 30))
+        c = self.game.corruption
+        draw_corruption(surface, c, self.t if hasattr(self, "t") else 0)
+        if not hidden(c, 0.7):
+            night = a.font(22).render(s["night_label"].format(n=self.night), True, GREY)
+            surface.blit(night, (40, 30))
+        if not hidden(c, 0.55):
+            j = a.font(22).render(f"Tab · {len(self.game.journal)}", True, GREY)
+            surface.blit(j, (w - j.get_width() - 40, 30))
 
         node = r.node
         speaker = self.graph.speakers.get(node.get("speaker", ""), "")
@@ -128,8 +136,9 @@ class DialogueScene(Scene):
             done = a.font(24).render(s["night_done"], True, GREY)
             surface.blit(done, done.get_rect(center=(w // 2, h - 100)))
 
-        hint = a.font(20).render(s["dialogue_hint"], True, GREY)
-        surface.blit(hint, hint.get_rect(center=(w // 2, h - 40)))
+        if not hidden(c, 0.35):
+            hint = a.font(20).render(s["dialogue_hint"], True, GREY)
+            surface.blit(hint, hint.get_rect(center=(w // 2, h - 40)))
         if self.notice_time > 0:
             note = a.font(22).render(s["new_memory"], True, ACCENT)
             surface.blit(note, note.get_rect(center=(w // 2, 90)))

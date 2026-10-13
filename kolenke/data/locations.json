@@ -4,8 +4,12 @@
     "name": "loc_corridor",
     "start": 300,
     "objects": [
-      { "id": "door_darkhan", "kind": "door", "x": 1900, "w": 120,
-        "label": "obj_door_darkhan", "to": "darkhan_room", "spawn": 220 }
+      { "id": "door_girls", "kind": "door", "x": 1100, "w": 120, "night": 2,
+        "label": "obj_door_girls", "to": "girls_room", "spawn": 220 },
+      { "id": "door_darkhan", "kind": "door", "x": 1900, "w": 120, "night": 1,
+        "label": "obj_door_darkhan", "to": "darkhan_room", "spawn": 220 },
+      { "id": "door_bekzat", "kind": "door", "x": 2250, "w": 120, "night": 3,
+        "label": "obj_door_bekzat", "to": "bekzat_room", "spawn": 220 }
     ]
   },
   "darkhan_room": {
@@ -15,10 +19,36 @@
     "objects": [
       { "id": "door_back", "kind": "door", "x": 120, "w": 120,
         "label": "obj_door_back", "to": "corridor", "spawn": 1900 },
-      { "id": "npc_darkhan", "kind": "npc", "x": 900, "w": 90,
-        "label": "obj_talk_darkhan", "dialogue": "night1.json", "night": 1,
-        "fight": "darkhan", "fight_label": "obj_fight_darkhan",
+      { "id": "npc_darkhan", "kind": "npc", "who": "darkhan", "x": 900, "w": 90, "night": 1,
+        "label": "obj_talk_darkhan", "dialogue": "night1.json", "fight": "darkhan",
         "accent": [230, 150, 50] }
+    ]
+  },
+  "girls_room": {
+    "width": 1280,
+    "name": "loc_girls_room",
+    "start": 220,
+    "objects": [
+      { "id": "door_back", "kind": "door", "x": 120, "w": 120,
+        "label": "obj_door_back", "to": "corridor", "spawn": 1100 },
+      { "id": "npc_zhanel", "kind": "npc", "who": "zhanel", "x": 780, "w": 90, "night": 2,
+        "label": "obj_talk_girls", "dialogue": "night2.json", "fight": "@order_1,order_2",
+        "accent": [90, 210, 180] },
+      { "id": "npc_madina", "kind": "npc", "who": "madina", "x": 960, "w": 90, "night": 2,
+        "label": "obj_talk_girls", "dialogue": "night2.json", "fight": "@order_1,order_2",
+        "accent": [205, 120, 215] }
+    ]
+  },
+  "bekzat_room": {
+    "width": 1280,
+    "name": "loc_bekzat_room",
+    "start": 220,
+    "objects": [
+      { "id": "door_back", "kind": "door", "x": 120, "w": 120,
+        "label": "obj_door_back", "to": "corridor", "spawn": 2250 },
+      { "id": "npc_bekzat", "kind": "npc", "who": "bekzat", "x": 900, "w": 90, "night": 3,
+        "label": "obj_talk_bekzat", "dialogue": "night3.json", "fight": "bekzat",
+        "accent": [240, 215, 120] }
     ]
   }
 }

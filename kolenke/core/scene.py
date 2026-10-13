@@ -13,6 +13,9 @@ class Scene:
     def on_exit(self):
         pass
 
+    def on_resume(self):
+        """Үстіндегі сахна жабылғанда шақырылады."""
+
     def handle_action(self, action):
         """Әрекет келгенде шақырылады (KEYMAP бойынша)."""
 

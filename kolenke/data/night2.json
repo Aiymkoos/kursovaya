@@ -1,0 +1,112 @@
+{
+  "id": "night2",
+  "start": "n1",
+  "speakers": { "narrator": "", "me": "Мен", "zhanel": "Жанель", "madina": "Мадина" },
+  "memories": {
+    "m_zhanel_drum": { "who": "zhanel", "text": "Жанель — барабаншы: сөйлегенде де ырғақ ұстайды." },
+    "m_zhanel_crash": { "who": "zhanel", "text": "Ауыр соққы алдында Жанель таяқтарын басынан жоғары көтереді." },
+    "m_zhanel_snare": { "who": "zhanel", "text": "Жеңіл соққы алдында Жанель білегін қағып, таяғын бұрады." },
+    "m_madina_sew": { "who": "madina", "text": "Мадина — тігінші: оның қимылдары ұсақ әрі өте дәл." },
+    "m_madina_needle": { "who": "madina", "text": "Ұзақ шаншу алдында Мадина қолын артқа тартып, жібін созады." },
+    "m_madina_stitch": { "who": "madina", "text": "Жылдам шаншу алдында Мадина ине ұстаған саусағын жиырады." }
+  },
+  "nodes": {
+    "n1": {
+      "speaker": "narrator",
+      "text": "Екінші түн. Буран күшейді, жатақханада бір ғана жылы бөлме қалды. Жанель мен Мадина сонда отыр.",
+      "next": "n2"
+    },
+    "n2": {
+      "speaker": "narrator",
+      "text": "Екеуінің де көздері бос қарайды. Көлеңке екеуін де алып барады, ал саған біреуіне ғана уақыт жетеді.",
+      "next": "n3"
+    },
+    "n3": {
+      "speaker": "me",
+      "text": "Кіммен сөйлесемін? Екіншісімен сөйлесуге үлгермеймін.",
+      "choices": [
+        { "text": "Жанельмен сөйлесемін.", "set": { "night2_focus": "zhanel", "order_1": "madina", "order_2": "zhanel" }, "next": "z1" },
+        { "text": "Мадинамен сөйлесемін.", "set": { "night2_focus": "madina", "order_1": "zhanel", "order_2": "madina" }, "next": "m1" }
+      ]
+    },
+
+    "z1": {
+      "speaker": "zhanel",
+      "text": "Тақ... тақ-тақ... Естіп тұрсың ба? Бұл — менің жүрегімнің ырғағы.",
+      "memory": "m_zhanel_drum",
+      "next": "zh"
+    },
+    "zh": {
+      "speaker": "me",
+      "text": "Жанель саусағымен тізесін қағып отыр.",
+      "choices": [
+        { "text": "Барабаныңды қалай ойнайсың?", "requires": { "knows_crash": false }, "next": "z4" },
+        { "text": "Қолыңды көрсетші.", "requires": { "knows_snare": false }, "next": "z5" },
+        { "text": "Жанель! Есіңе түсір, сен — Жанельсің!", "set": { "zhanel_called_name": true }, "next": "z7" },
+        { "text": "Үнсіз қарап отыру.", "next": "z7" }
+      ]
+    },
+    "z4": {
+      "speaker": "zhanel",
+      "text": "Ең қатты соққыны ойнар алдында таяқтарды мынау жерге дейін көтеремін. Сосын — гүрс!",
+      "set": { "knows_crash": true },
+      "memory": "m_zhanel_crash",
+      "next": "zh"
+    },
+    "z5": {
+      "speaker": "narrator",
+      "text": "Жанель оң білегін шапшаң қағып, ойнаған таяғын айналдырады. Бұл — оның жеңіл соққысы.",
+      "set": { "knows_snare": true },
+      "memory": "m_zhanel_snare",
+      "next": "zh"
+    },
+    "z7": {
+      "speaker": "narrator",
+      "text": "Мадина орнынан тұрды. Бетіндегі белгілер өшіп барады, көзі бос. Ол бірінші өзгерді.",
+      "next": "end_t"
+    },
+
+    "m1": {
+      "speaker": "madina",
+      "text": "Ине... жіп... Әр тігіс — бір қимыл. Артық ештеңе жоқ.",
+      "memory": "m_madina_sew",
+      "next": "mh"
+    },
+    "mh": {
+      "speaker": "me",
+      "text": "Мадина инесін саусақтарының арасында айналдырып отыр.",
+      "choices": [
+        { "text": "Инені қалай ұстайсың?", "requires": { "knows_stitch": false }, "next": "m4" },
+        { "text": "Ұзын тігісті қалай тігесің?", "requires": { "knows_needle": false }, "next": "m5" },
+        { "text": "Мадина! Есіңе түсір, сен — Мадинасың!", "set": { "madina_called_name": true }, "next": "m7" },
+        { "text": "Үнсіз қарап отыру.", "next": "m7" }
+      ]
+    },
+    "m4": {
+      "speaker": "madina",
+      "text": "Тез тігетін кезде саусағымды жиырамын, міне былай. Бір сәт — және тігіс дайын.",
+      "set": { "knows_stitch": true },
+      "memory": "m_madina_stitch",
+      "next": "mh"
+    },
+    "m5": {
+      "speaker": "narrator",
+      "text": "Мадина қолын артқа тартып, жібін созады. Содан кейін ине алға қарай ұзақ шаншылады.",
+      "set": { "knows_needle": true },
+      "memory": "m_madina_needle",
+      "next": "mh"
+    },
+    "m7": {
+      "speaker": "narrator",
+      "text": "Жанель барабан таяқтарын қолына алды. Бетіндегі белгілер өшіп барады, көзі бос. Ол бірінші өзгерді.",
+      "next": "end_t"
+    },
+
+    "end_t": {
+      "speaker": "narrator",
+      "text": "Көлеңке екеуін де жұтты. Қараңғы бөлмеде екі силуэт қалды. Алдымен біріншісімен күресуге тура келеді.",
+      "next": "the_end"
+    },
+    "the_end": { "end": true }
+  }
+}

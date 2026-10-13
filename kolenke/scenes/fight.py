@@ -14,6 +14,7 @@ from kolenke.combat.setup import RESTORE_RESERVE_COST, fight_params
 from kolenke.combat.hitbox import GROUND
 from kolenke.core.scene import Scene
 from kolenke.explore.locations import Location
+from kolenke.render.corruption import draw_corruption, hidden, protagonist_detail
 from kolenke.render.effects import ScreenShake
 from kolenke.render.fighter_draw import draw_fighter
 from kolenke.render.lighting import Lighting, make_vignette
@@ -21,6 +22,8 @@ from kolenke.render.particles import Blizzard, ParticleSystem
 from kolenke.render.scenery import build_scenery
 
 TICK = 1 / 60
+ARENA_ROOM = {"darkhan": "darkhan_room", "zhanel": "girls_room",
+              "madina": "girls_room", "bekzat": "bekzat_room"}
 WHITE = (230, 230, 230)
 GREY = (120, 120, 120)
 ACCENT = (200, 60, 60)
@@ -41,7 +44,8 @@ class FightScene(Scene):
         w, h = game.screen.get_size()
         self.size = (w, h)
         self.canvas = pygame.Surface((w, h))
-        self.scenery = build_scenery(Location("arena", w, "", w // 2, []))
+        room = ARENA_ROOM.get(enemy, "darkhan_room")
+        self.scenery = build_scenery(Location(room, w, "", w // 2, []))
         self.lighting = Lighting((w, h))
         self.vignette = make_vignette((w, h))
         self.blizzard = Blizzard(w, h, count=260, wind=-180)
@@ -96,6 +100,7 @@ class FightScene(Scene):
     # --- логика ---
     def update(self, dt):
         self.t += dt
+        self.game.tick_corruption(dt)
         self.shake.update(dt)
         if self.slow_left > 0:
             self.slow_left -= dt
@@ -230,8 +235,9 @@ class FightScene(Scene):
                                flicker=0, seed=0))
         self.lighting.ambient = sc.ambient
         self.lighting.render(c, lights, 0, self.t)
-        for fighter, accent in ((fe, ae), (fp, ap)):
-            draw_fighter(c, fighter, accent, self.t, part="accent")
+        cor = self.game.corruption
+        draw_fighter(c, fe, ae, self.t, part="accent")
+        draw_fighter(c, fp, ap, self.t, part="accent", detail=protagonist_detail(cor))
         self._draw_tell(c, ae)
         c.blit(self.vignette, (0, 0))
         if self.time_scale < 0.6:  # баяулау: суық реңк
@@ -242,6 +248,7 @@ class FightScene(Scene):
 
         surface.fill((0, 0, 0))
         surface.blit(c, self.shake.offset())
+        draw_corruption(surface, cor, self.t)
         self._draw_hud(surface)
 
     def _draw_tell(self, surface, accent):
@@ -292,25 +299,30 @@ class FightScene(Scene):
         fp, fe = self.fight.player, self.fight.enemy
         ap, ae = tuple(fp.spec["accent"]), tuple(fe.spec["accent"])
         font = a.font(20, bold=True)
+        cor = self.game.corruption
         surface.blit(font.render(s["who_player"], True, ap), (40, 22))
-        name = font.render(s["who_" + self.enemy_name], True, ae)
-        surface.blit(name, (w - 40 - name.get_width(), 22))
         self._bar(surface, pygame.Rect(40, 52, 460, 22), fp.hp / fp.max_hp, ap)
-        self._bar(surface, pygame.Rect(w - 500, 52, 460, 22), fe.hp / fe.max_hp, ae, True)
+        if not hidden(cor, 0.8):          # 3-түн: қарсылас жолағы жоғала бастайды
+            name = font.render(s["who_" + self.enemy_name], True, ae)
+            surface.blit(name, (w - 40 - name.get_width(), 22))
+            self._bar(surface, pygame.Rect(w - 500, 52, 460, 22), fe.hp / fe.max_hp, ae, True)
         mem = pygame.Rect(40, 82, 300, 12)  # естелік жолағы
-        self._bar(surface, mem, fp.memory / fp.max_memory, (230, 230, 245))
-        for i in (1, 2):
-            x = mem.x + mem.width * i // 3
-            pygame.draw.line(surface, (70, 70, 84), (x, mem.top), (x, mem.bottom), 2)
-        surface.blit(a.font(16).render(s["fight_memory"], True, GREY), (348, 79))
+        if not hidden(cor, 0.6):
+            self._bar(surface, mem, fp.memory / fp.max_memory, (230, 230, 245))
+            for i in (1, 2):
+                x = mem.x + mem.width * i // 3
+                pygame.draw.line(surface, (70, 70, 84), (x, mem.top), (x, mem.bottom), 2)
+            surface.blit(a.font(16).render(s["fight_memory"], True, GREY), (348, 79))
         for i in (1, 2, 3):
+            if hidden(cor, 0.6):
+                break
             ok = self.fight.usable(i)
             pulse = i == 3 and ok and int(self.t * 6) % 2 == 0
             col = (255, 255, 255) if pulse else ((230, 230, 245) if ok else (80, 80, 94))
             surface.blit(a.font(18, bold=ok).render(s[f"slot{i}"], True, col),
                          (40 + (i - 1) * 100, 100))
         pred = getattr(self.fight.controllers.get(self.fight.enemy), "predictor", None)
-        if pred and len(pred.log) >= 4:     # Көлеңке сені қаншалықты үйренді
+        if pred and len(pred.log) >= 4 and not hidden(cor, 0.5):     # Көлеңке сені қаншалықты үйренді
             txt = a.font(18).render(
                 s["fight_ai_acc"].format(p=int(pred.accuracy * 100)), True, (150, 120, 215))
             surface.blit(txt, (w - 40 - txt.get_width(), 82))
@@ -321,9 +333,9 @@ class FightScene(Scene):
             img = a.font(30, bold=True).render(text, True, color)
             img.set_alpha(int(255 * min(1.0, life / 0.4)))
             surface.blit(img, img.get_rect(center=(x, y)))
-        surface.blit(a.font(18).render(s["fight_controls"], True, GREY),
-                     a.font(18).render(s["fight_controls"], True, GREY).get_rect(
-                         center=(w // 2, h - 28)))
+        if not hidden(cor, 0.35):
+            ctrl = a.font(18).render(s["fight_controls"], True, GREY)
+            surface.blit(ctrl, ctrl.get_rect(center=(w // 2, h - 28)))
         if self.result:
             dim = pygame.Surface((w, h))
             dim.set_alpha(150)

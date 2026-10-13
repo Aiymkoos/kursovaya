@@ -1,6 +1,7 @@
 """Басты мәзір және уақытша 1-түн сахнасы."""
 import pygame
 
+from kolenke.core.save import has_save, load_game
 from kolenke.core.scene import Scene
 from kolenke.scenes.explore import ExploreScene
 
@@ -13,14 +14,26 @@ class MenuScene(Scene):
     def __init__(self, game):
         super().__init__(game)
         self.index = 0
-        s = game.strings
-        self.items = [
-            (s["menu_new_game"], self._new_game),
-            (s["menu_quit"], game.quit),
-        ]
+        self._build_items()
+
+    def _build_items(self):
+        s = self.game.strings
+        self.items = []
+        if has_save():
+            self.items.append((s["menu_continue"], self._continue))
+        self.items += [(s["menu_new_game"], self._new_game), (s["menu_quit"], self.game.quit)]
+        self.index = 0
+
+    def on_resume(self):
+        self._build_items()
+
+    def _continue(self):
+        if load_game(self.game):
+            self.game.push(ExploreScene(self.game))
 
     def _new_game(self):
         self.game.new_game_state()
+        self.game.start_night(1)
         self.game.push(ExploreScene(self.game))
 
     def handle_action(self, action):

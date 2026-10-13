@@ -66,7 +66,7 @@ def _lamp_fixture(surf, x, y=64):
     pygame.draw.rect(surf, (200, 190, 150), pygame.Rect(x - 22, y, 44, 10), border_radius=4)
 
 
-def build_corridor(loc, objects):
+def build_corridor(loc, objects, night=0):
     w = loc.width
     surf = pygame.Surface((w, H))
     _gradient(w, 0, WALL_BOTTOM, (44, 52, 64), (26, 30, 38), surf)
@@ -77,9 +77,9 @@ def build_corridor(loc, objects):
     pygame.draw.line(surf, (70, 80, 92), (0, 390), (w, 390), 3)
     _floor(surf, w)
     windows = []
-    for x in (700, 1260):
+    for x in (700, 1600):
         _window(surf, pygame.Rect(x - 90, 130, 180, 220), windows)
-    lights, pillars = [], [1500]
+    lights, pillars = [], [1350]
     for x, flick, power in ((450, 0.8, 1), (1100, 0, 0), (1700, 0.35, 1), (2200, 0.1, 1)):
         _lamp_fixture(surf, x)
         if power:
@@ -88,15 +88,68 @@ def build_corridor(loc, objects):
     for o in objects:
         if o.kind == "door":
             _door(surf, o)
-            lights.append(dict(x=o.x, y=WALL_BOTTOM - 20, r=190, color=(255, 190, 110),
-                               i=0.8, flicker=0.15, seed=o.x))
+            if o.active(night):   # тек белсенді есіктің астынан жарық түседі
+                lights.append(dict(x=o.x, y=WALL_BOTTOM - 20, r=190, color=(255, 190, 110),
+                                   i=0.8, flicker=0.15, seed=o.x))
     for wnd in windows:  # терезеден түсетін суық жарық
         lights.append(dict(x=wnd.centerx, y=wnd.centery + 60, r=300,
                            color=(110, 150, 220), i=0.75, flicker=0, seed=0))
     return Scenery(surf, windows, lights, pillars, ambient=(46, 54, 78))
 
 
-def build_room(loc, objects):
+def _room_darkhan(surf, lights):
+    pygame.draw.rect(surf, (20, 18, 24), (300, 470, 230, 90))      # кереует
+    pygame.draw.rect(surf, (36, 40, 62), (306, 464, 218, 40), border_radius=6)
+    pygame.draw.rect(surf, (14, 12, 16), (292, 420, 16, 140))
+    pygame.draw.rect(surf, (28, 22, 20), (1010, 500, 160, 14))     # үстел мен шам
+    pygame.draw.rect(surf, (20, 16, 14), (1020, 514, 12, 46))
+    pygame.draw.rect(surf, (20, 16, 14), (1148, 514, 12, 46))
+    pygame.draw.rect(surf, (230, 200, 120), (1080, 470, 14, 30), border_radius=3)
+    for i in range(3):                                              # сөре
+        pygame.draw.rect(surf, (22, 18, 18), (860, 250 + i * 58, 200, 8))
+        for j in range(7):
+            pygame.draw.rect(surf, [(80, 50, 46), (50, 64, 80), (90, 80, 52)][(i + j) % 3],
+                             (868 + j * 26, 214 + i * 58, 18, 36))
+    lights.append(dict(x=1087, y=470, r=420, color=(255, 190, 110), i=1.0, flicker=0.25, seed=3))
+
+
+def _room_girls(surf, lights):
+    pygame.draw.ellipse(surf, (18, 14, 14), (260, 470, 150, 110))   # барабан
+    pygame.draw.ellipse(surf, (60, 64, 70), (260, 462, 150, 40))
+    pygame.draw.line(surf, (30, 24, 22), (290, 560), (270, 600), 5)
+    pygame.draw.line(surf, (30, 24, 22), (380, 560), (400, 600), 5)
+    pygame.draw.rect(surf, (28, 22, 20), (1000, 500, 200, 14))      # тігін машинасы үстелі
+    pygame.draw.rect(surf, (20, 16, 14), (1015, 514, 12, 46))
+    pygame.draw.rect(surf, (20, 16, 14), (1173, 514, 12, 46))
+    pygame.draw.rect(surf, (50, 52, 60), (1060, 456, 80, 44), border_radius=6)
+    pygame.draw.rect(surf, (70, 72, 82), (1110, 436, 12, 24))
+    pygame.draw.circle(surf, (150, 60, 90), (1075, 440), 10)         # катушка
+    for i in range(4):                                               # маталар
+        pygame.draw.rect(surf, [(110, 60, 90), (60, 90, 100), (100, 90, 50), (70, 60, 110)][i],
+                         (860 + i * 28, 300, 22, 120))
+    lights.append(dict(x=1100, y=470, r=420, color=(255, 190, 120), i=1.0, flicker=0.2, seed=5))
+
+
+def _room_bekzat(surf, lights):
+    pygame.draw.rect(surf, (28, 22, 20), (980, 500, 200, 14))       # үстел
+    pygame.draw.rect(surf, (20, 16, 14), (995, 514, 12, 46))
+    pygame.draw.rect(surf, (20, 16, 14), (1153, 514, 12, 46))
+    pygame.draw.polygon(surf, (36, 28, 24), [(1060, 500), (1120, 500), (1105, 420), (1075, 420)])  # метроном
+    pygame.draw.line(surf, (190, 180, 150), (1090, 500), (1100, 428), 3)
+    for k in range(6):                                               # ноталар/қағаздар
+        pygame.draw.rect(surf, (150, 148, 138), (860 + k * 22, 520 - (k % 2) * 6, 18, 24))
+    pygame.draw.rect(surf, (20, 18, 24), (300, 470, 230, 90))        # кереует
+    pygame.draw.rect(surf, (52, 40, 40), (306, 464, 218, 40), border_radius=6)
+    lights.append(dict(x=1090, y=450, r=300, color=(255, 215, 150), i=0.8, flicker=0.55, seed=9))
+
+
+ROOM_VARIANTS = {"darkhan_room": _room_darkhan, "girls_room": _room_girls,
+                 "bekzat_room": _room_bekzat}
+ROOM_AMBIENT = {"darkhan_room": (58, 50, 66), "girls_room": (60, 52, 68),
+                "bekzat_room": (46, 44, 62)}
+
+
+def build_room(loc, objects, night=0):
     w = loc.width
     surf = pygame.Surface((w, H))
     _gradient(w, 0, WALL_BOTTOM, (52, 44, 50), (30, 26, 32), surf)
@@ -104,29 +157,14 @@ def build_room(loc, objects):
     _floor(surf, w)
     windows = []
     _window(surf, pygame.Rect(540, 120, 200, 240), windows)
-    # кереует
-    pygame.draw.rect(surf, (20, 18, 24), (300, 470, 230, 90))
-    pygame.draw.rect(surf, (36, 40, 62), (306, 464, 218, 40), border_radius=6)
-    pygame.draw.rect(surf, (14, 12, 16), (292, 420, 16, 140))
-    # үстел мен шам
-    pygame.draw.rect(surf, (28, 22, 20), (1010, 500, 160, 14))
-    pygame.draw.rect(surf, (20, 16, 14), (1020, 514, 12, 46))
-    pygame.draw.rect(surf, (20, 16, 14), (1148, 514, 12, 46))
-    pygame.draw.rect(surf, (230, 200, 120), (1080, 470, 14, 30), border_radius=3)
-    # сөре
-    for i in range(3):
-        pygame.draw.rect(surf, (22, 18, 18), (860, 250 + i * 58, 200, 8))
-        for j in range(7):
-            pygame.draw.rect(surf, [(80, 50, 46), (50, 64, 80), (90, 80, 52)][(i + j) % 3],
-                             (868 + j * 26, 214 + i * 58, 18, 36))
-    lights = [dict(x=1087, y=470, r=420, color=(255, 190, 110), i=1.0, flicker=0.25, seed=3),
-              dict(x=640, y=330, r=320, color=(110, 150, 220), i=0.7, flicker=0, seed=0)]
+    lights = [dict(x=640, y=330, r=320, color=(110, 150, 220), i=0.7, flicker=0, seed=0)]
+    ROOM_VARIANTS.get(loc.id, _room_darkhan)(surf, lights)
     for o in objects:
         if o.kind == "door":
             _door(surf, o)
-    return Scenery(surf, windows, lights, [], ambient=(58, 50, 66))
+    return Scenery(surf, windows, lights, [], ambient=ROOM_AMBIENT.get(loc.id, (58, 50, 66)))
 
 
-def build_scenery(loc):
+def build_scenery(loc, night=0):
     builder = build_corridor if loc.id == "corridor" else build_room
-    return builder(loc, loc.objects)
+    return builder(loc, loc.objects, night)

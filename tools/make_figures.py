@@ -19,8 +19,8 @@ FONT = 7.5
 
 
 # ---------- фигуралар ----------
-def txt(ax, x, y, s, size=FONT, bold=False):
-    ax.text(x, y, s, ha="center", va="center", fontsize=size,
+def txt(ax, x, y, s, size=None, bold=False):
+    ax.text(x, y, s, ha="center", va="center", fontsize=size or FONT,
             fontweight="bold" if bold else "normal", linespacing=1.15)
 
 
@@ -115,10 +115,10 @@ def line(ax, pts, arrow=True, both=False, dashed=False, label=None, lpos=None):
 
 # ---------- функционалдық сызба ----------
 def functional(path):
-    fig = plt.figure(figsize=(11.69, 7.89), dpi=200)
+    fig = plt.figure(figsize=(11.69, 8.04), dpi=200)
     ax = fig.add_axes([0.01, 0.01, 0.98, 0.98])
     ax.set_xlim(0, 160)
-    ax.set_ylim(2, 110)
+    ax.set_ylim(2, 112)
     ax.axis("off")
     X = [20, 45, 70, 95, 120, 145]
     R1, R2, R3, R4, R5 = 102, 82, 62, 42, 22
@@ -215,6 +215,8 @@ STRUCT = [
 
 
 def structural(path):
+    global FONT
+    old_font, FONT = FONT, 10.0
     fig = plt.figure(figsize=(8.27, 11.69), dpi=200)
     ax = fig.add_axes([0.01, 0.01, 0.98, 0.98])
     ax.set_xlim(0, 100)
@@ -244,9 +246,10 @@ def structural(path):
         line(ax, [(cx, 66), (cx, 64)], arrow=False)
         column(cx, 60, t, it, 26)
     txt(ax, 50, 2.5, "Тәуелділік бағыты: scenes → (core, story, explore, combat, render) → data.  "
-                     "tools/: experiment.py, screenshots.py, make_figures.py", size=6.8)
+                     "tools/: experiment.py, screenshots.py, make_figures.py", size=8.5)
     fig.savefig(path)
     plt.close(fig)
+    FONT = old_font
 
 
 if __name__ == "__main__":

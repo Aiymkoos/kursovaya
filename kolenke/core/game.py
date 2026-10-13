@@ -10,6 +10,7 @@ from kolenke.story.journal import Journal
 
 LOGICAL_SIZE = (1280, 720)  # ішкі ажыратымдылық, экранға масштабталады
 FPS = 60
+FADE_IN = 0.45
 
 
 class Game:
@@ -25,6 +26,8 @@ class Game:
         self.input = InputBuffer()
         self.scenes = []
         self.held = set()
+        self.fade_in = 0.0     # жаңа сахнаға өткенде жұмсақ ашылу (секунд)
+        self._veil = pygame.Surface(LOGICAL_SIZE)
         self.running = True
         self.new_game_state()
 
@@ -61,6 +64,7 @@ class Game:
     def push(self, scene):
         self.scenes.append(scene)
         scene.on_enter()
+        self.fade_in = FADE_IN
 
     def pop(self):
         if self.scenes:
@@ -111,6 +115,10 @@ class Game:
         self.screen.fill((0, 0, 0))
         if self.scene:
             self.scene.draw(self.screen)
+        if self.fade_in > 0:                      # қараңғыдан жұмсақ ашылу
+            self.fade_in = max(0.0, self.fade_in - dt)
+            self._veil.set_alpha(int(255 * (self.fade_in / FADE_IN) ** 1.5))
+            self.screen.blit(self._veil, (0, 0))
         pygame.display.flip()
 
     def run(self):

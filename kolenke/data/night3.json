@@ -1,13 +1,33 @@
 {
   "id": "night3",
+  "bg": "bekzat_room",
   "start": "n1",
-  "speakers": { "narrator": "", "me": "Мен", "bekzat": "Бекзат" },
+  "speakers": {
+    "narrator": "",
+    "me": "Мен",
+    "bekzat": "Бекзат"
+  },
   "memories": {
-    "m_self_fade": { "who": "me", "text": "Мен өз қолымның сызықтарын көре алмай қалдым. Көлеңке мені де алып барады." },
-    "m_bekzat_met": { "who": "bekzat", "text": "Бекзат метрономсыз тұра алмайды: әр әрекетін санап істейді." },
-    "m_bekzat_tick": { "who": "bekzat", "text": "Жылдам соққы алдында Бекзат «бір» деп санап, иығын қозғалтады." },
-    "m_bekzat_tock": { "who": "bekzat", "text": "Ауыр соққы алдында Бекзат «екі» деп санап, қолын жоғары көтереді." },
-    "m_bekzat_sweep": { "who": "bekzat", "text": "Шеңбер бойымен сермеу алдында Бекзат тізесін бүгіп, денесін бұрады." }
+    "m_self_fade": {
+      "who": "me",
+      "text": "Мен өз қолымның сызықтарын көре алмай қалдым. Көлеңке мені де алып барады."
+    },
+    "m_bekzat_met": {
+      "who": "bekzat",
+      "text": "Бекзат метрономсыз тұра алмайды: әр әрекетін санап істейді."
+    },
+    "m_bekzat_tick": {
+      "who": "bekzat",
+      "text": "Жылдам соққы алдында Бекзат «бір» деп санап, иығын қозғалтады."
+    },
+    "m_bekzat_tock": {
+      "who": "bekzat",
+      "text": "Ауыр соққы алдында Бекзат «екі» деп санап, қолын жоғары көтереді."
+    },
+    "m_bekzat_sweep": {
+      "who": "bekzat",
+      "text": "Шеңбер бойымен сермеу алдында Бекзат тізесін бүгіп, денесін бұрады."
+    }
   },
   "nodes": {
     "n1": {
@@ -30,25 +50,79 @@
       "speaker": "bekzat",
       "text": "Қалғандарың қайда? Дархан... Жанель... Мадина... Есімде жоқ. Тек санау қалды.",
       "memory": "m_bekzat_met",
-      "next": "hub"
+      "next": "hub",
+      "states": {
+        "bekzat": "fading"
+      }
     },
     "hub": {
       "speaker": "me",
       "text": "Бекзат метрономның тіліне қарап отыр. Уақыт аз қалды.",
       "choices": [
-        { "text": "Метрономың туралы сұрау.", "requires": { "knows_tick": false }, "next": "b_met" },
-        { "text": "Қолыңды қалай қозғайтыныңды көрсетші.", "requires": { "knows_sweep": false }, "next": "b_sweep" },
-        { "text": "Дарханның айтқанын еске түсіру.", "requires": { "darkhan_saved": true, "knows_sweep": false }, "next": "b_dark" },
-        { "text": "Жанельдің ырғағын еске түсіру.", "requires": { "zhanel_saved": true, "bekzat_called_name": false }, "set": { "bekzat_called_name": true }, "next": "b_remind" },
-        { "text": "Мадинаның қайтып келгенін айту.", "requires": { "madina_saved": true, "bekzat_called_name": false }, "set": { "bekzat_called_name": true }, "next": "b_remind" },
-        { "text": "Бекзат! Сен — Бекзатсың! Есіңе түсір!", "set": { "bekzat_called_name": true }, "next": "b_end" },
-        { "text": "Үнсіз қалу.", "next": "b_end" }
+        {
+          "text": "Метрономың туралы сұрау.",
+          "requires": {
+            "knows_tick": false
+          },
+          "next": "b_met"
+        },
+        {
+          "text": "Қолыңды қалай қозғайтыныңды көрсетші.",
+          "requires": {
+            "knows_sweep": false
+          },
+          "next": "b_sweep"
+        },
+        {
+          "text": "Дарханның айтқанын еске түсіру.",
+          "requires": {
+            "darkhan_saved": true,
+            "knows_sweep": false
+          },
+          "next": "b_dark"
+        },
+        {
+          "text": "Жанельдің ырғағын еске түсіру.",
+          "requires": {
+            "zhanel_saved": true,
+            "bekzat_called_name": false
+          },
+          "set": {
+            "bekzat_called_name": true
+          },
+          "next": "b_remind"
+        },
+        {
+          "text": "Мадинаның қайтып келгенін айту.",
+          "requires": {
+            "madina_saved": true,
+            "bekzat_called_name": false
+          },
+          "set": {
+            "bekzat_called_name": true
+          },
+          "next": "b_remind"
+        },
+        {
+          "text": "Бекзат! Сен — Бекзатсың! Есіңе түсір!",
+          "set": {
+            "bekzat_called_name": true
+          },
+          "next": "b_end"
+        },
+        {
+          "text": "Үнсіз қалу.",
+          "next": "b_end"
+        }
       ]
     },
     "b_met": {
       "speaker": "bekzat",
       "text": "Тік — бұл мен жылдам соққы жасайтын кез: мен «бір» деп санап, иығымды қозғалтамын. Так — ауыр соққы: «екі» деп, қолымды жоғары көтеремін.",
-      "set": { "knows_tick": true, "knows_tock": true },
+      "set": {
+        "knows_tick": true,
+        "knows_tock": true
+      },
       "memory": "m_bekzat_tick",
       "next": "b_met2"
     },
@@ -61,14 +135,18 @@
     "b_sweep": {
       "speaker": "narrator",
       "text": "Бекзат тізесін бүгіп, денесін бұрады да, қолымен үлкен шеңбер сызады. Бұл — оның ең қауіпті соққысы.",
-      "set": { "knows_sweep": true },
+      "set": {
+        "knows_sweep": true
+      },
       "memory": "m_bekzat_sweep",
       "next": "hub"
     },
     "b_dark": {
       "speaker": "bekzat",
       "text": "Дархан... нан иісі... Иә, ол менің қолымды бақылаған: «Бекзат, сен тізеңді бүгіп барып, шеңбер сызасың» деген.",
-      "set": { "knows_sweep": true },
+      "set": {
+        "knows_sweep": true
+      },
       "memory": "m_bekzat_sweep",
       "next": "hub"
     },
@@ -80,8 +158,13 @@
     "b_end": {
       "speaker": "narrator",
       "text": "Метроном үні тоқтады. Бекзаттың қолындағы таяқ метроном тілінің орнына тұрды. Ол бұрылды.",
-      "next": "the_end"
+      "next": "the_end",
+      "states": {
+        "bekzat": "shadow"
+      }
     },
-    "the_end": { "end": true }
+    "the_end": {
+      "end": true
+    }
   }
 }

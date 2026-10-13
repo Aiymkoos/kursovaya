@@ -51,6 +51,8 @@ class FightScene(Scene):
         self.blizzard = Blizzard(w, h, count=260, wind=-180)
         self.particles = ParticleSystem(limit=500)
         self.shake = ScreenShake()
+        self.zoom = 0.0          # кино-зум (парирлеу/KO кезінде)
+        self.zoom_pt = (w // 2, GROUND - 100)
         self.t = 0.0
         self._start()
 
@@ -102,6 +104,7 @@ class FightScene(Scene):
         self.t += dt
         self.game.tick_corruption(dt)
         self.shake.update(dt)
+        self.zoom = max(0.0, self.zoom - dt * 0.22)
         if self.slow_left > 0:
             self.slow_left -= dt
         self.time_scale = SLOW_SCALE if self.slow_left > 0 else min(
@@ -149,6 +152,7 @@ class FightScene(Scene):
     def _on_event(self, ev):
         s = self.game.strings
         if ev.type == "parry":
+            self.zoom, self.zoom_pt = 0.07, (ev.x, ev.y)
             self.shake.add(0.55)
             self.slow_left = 0.7
             self._burst(ev.x, ev.y, 34, PARRY_COL, 520)
@@ -186,6 +190,7 @@ class FightScene(Scene):
             self._burst(ev.x, ev.y, 60, (255, 245, 220), 260)
             self.popups.append([s["fight_restore"], ev.x, ev.y - 90, 1.6, (255, 245, 220)])
         elif ev.type == "ko":
+            self.zoom, self.zoom_pt = 0.11, (ev.x, ev.y)
             self.slow_left = 1.4
             self.shake.add(0.8)
             self._burst(ev.x, ev.y, 50, SPARK, 600)
@@ -247,7 +252,14 @@ class FightScene(Scene):
             c.blit(tint, (0, 0))
 
         surface.fill((0, 0, 0))
-        surface.blit(c, self.shake.offset())
+        ox, oy = self.shake.offset()
+        if self.zoom > 0.004:       # зум: фокус нүктесіне қарай үлкейту
+            z = 1 + self.zoom
+            big = pygame.transform.smoothscale(c, (int(w * z), int(h * z)))
+            fx, fy = self.zoom_pt
+            surface.blit(big, (ox - int(fx * self.zoom), oy - int(fy * self.zoom)))
+        else:
+            surface.blit(c, (ox, oy))
         draw_corruption(surface, cor, self.t)
         self._draw_hud(surface)
 

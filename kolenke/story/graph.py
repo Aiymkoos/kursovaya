@@ -6,6 +6,10 @@ set ({флаг: мән}), memory (журналға жазба id).
 """
 import json
 
+VALID_STATES = ("human", "fading", "shadow")
+VALID_BG = ("darkhan_room", "girls_room", "bekzat_room")
+OFFSCREEN = ("narrator", "me")   # экранда портреті жоқ
+
 
 class GraphError(Exception):
     pass
@@ -18,7 +22,13 @@ class DialogueGraph:
         self.nodes = data["nodes"]
         self.speakers = data.get("speakers", {})
         self.memories = data.get("memories", {})
+        self.bg = data.get("bg", "darkhan_room")
         self.validate()
+
+    @property
+    def cast(self):
+        """Экранда көрінетін кейіпкерлер (сөйлесушілер, нарратор мен басты кейіпкерден басқа)."""
+        return [k for k in self.speakers if k not in OFFSCREEN]
 
     @classmethod
     def load(cls, path):
@@ -36,6 +46,8 @@ class DialogueGraph:
     def validate(self):
         if self.start not in self.nodes:
             raise GraphError(f"Бастапқы түйін жоқ: {self.start}")
+        if self.bg not in VALID_BG:
+            raise GraphError(f"Белгісіз фон: {self.bg}")
         for nid, node in self.nodes.items():
             ends = [k for k in ("next", "choices", "end") if k in node]
             if len(ends) != 1:
@@ -46,6 +58,12 @@ class DialogueGraph:
             for mem in self._memory_refs(node):
                 if mem not in self.memories:
                     raise GraphError(f"{nid}: белгісіз естелік: {mem}")
+            for spec in [node] + list(node.get("choices", [])):
+                for who, st in spec.get("states", {}).items():
+                    if who not in self.speakers or who in OFFSCREEN:
+                        raise GraphError(f"{nid}: күй берілген кейіпкер экранда жоқ: {who}")
+                    if st not in VALID_STATES:
+                        raise GraphError(f"{nid}: белгісіз күй: {st}")
             if node.get("speaker") and node["speaker"] not in self.speakers:
                 raise GraphError(f"{nid}: белгісіз кейіпкер: {node['speaker']}")
         unreachable = set(self.nodes) - self.reachable()
@@ -76,6 +94,7 @@ class DialogueRunner:
         self.flags = flags
         self.journal = journal
         self.node_id = None
+        self.states = {}   # кейіпкер -> human | fading | shadow (түйіндер ауыстырады)
         self._enter(graph.start)
 
     @property
@@ -87,6 +106,7 @@ class DialogueRunner:
         return "end" in self.node
 
     def _apply(self, spec):
+        self.states.update(spec.get("states", {}))
         for k, v in spec.get("set", {}).items():
             self.flags.set(k, v)
         if "memory" in spec:

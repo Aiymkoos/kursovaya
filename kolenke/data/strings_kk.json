@@ -58,5 +58,7 @@
   "night_next_hint": "Space — келесі түн",
   "night_final_hint": "Space — финал",
   "ending_hint": "Space — әрі қарай",
-  "menu_continue": "Жалғастыру"
+  "menu_continue": "Жалғастыру",
+  "status_saved": "қайтып келді",
+  "status_lost": "көлеңкеде қалды"
 }

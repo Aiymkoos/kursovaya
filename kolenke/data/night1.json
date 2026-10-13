@@ -1,5 +1,6 @@
 {
   "id": "night1",
+  "bg": "darkhan_room",
   "start": "n1",
   "speakers": {
     "narrator": "",
@@ -40,15 +41,26 @@
       "speaker": "me",
       "text": "Дархан үнсіз отыр. Не айтамын?",
       "choices": [
-        { "text": "Наубайханада не істейсің?", "next": "ask_work" },
-        { "text": "Қолыңа қарашы, дірілдеп тұр ғой.", "next": "ask_hands" },
-        { "text": "Ұйықта, таң атқанша күтейік.", "next": "sleep" }
+        {
+          "text": "Наубайханада не істейсің?",
+          "next": "ask_work"
+        },
+        {
+          "text": "Қолыңа қарашы, дірілдеп тұр ғой.",
+          "next": "ask_hands"
+        },
+        {
+          "text": "Ұйықта, таң атқанша күтейік.",
+          "next": "sleep"
+        }
       ]
     },
     "ask_work": {
       "speaker": "darkhan",
       "text": "Түнгі ауысымда нан пісіремін. Қамырды кесіп, пышақпен бөлемін. Мың рет қайталағандықтан, көзімді жұмып та істей беремін.",
-      "set": { "asked_bakery": true },
+      "set": {
+        "asked_bakery": true
+      },
       "memory": "m_bakery",
       "next": "ask_work2"
     },
@@ -58,16 +70,23 @@
       "choices": [
         {
           "text": "Қалай кесетініңді көрсетші.",
-          "requires": { "asked_bakery": true },
+          "requires": {
+            "asked_bakery": true
+          },
           "next": "show_knife"
         },
-        { "text": "Қиын емес пе?", "next": "easy" }
+        {
+          "text": "Қиын емес пе?",
+          "next": "easy"
+        }
       ]
     },
     "show_knife": {
       "speaker": "narrator",
       "text": "Дархан ауада пышақ ұстағандай қолын көтеріп, білегін жеңіл бұрады да, жоғарыдан төмен түсіреді. Бұл қимыл оған өте таныс.",
-      "set": { "knows_overhead": true },
+      "set": {
+        "knows_overhead": true
+      },
       "memory": "m_overhead",
       "next": "hands_common"
     },
@@ -84,7 +103,9 @@
     "ask_hands2": {
       "speaker": "narrator",
       "text": "Ол саусақтарымен үстелді екі рет қағады.",
-      "set": { "knows_tap": true },
+      "set": {
+        "knows_tap": true
+      },
       "memory": "m_tap",
       "next": "hands_common"
     },
@@ -96,26 +117,46 @@
     "hands_common": {
       "speaker": "narrator",
       "text": "Шам жыпылықтап, сөніп қалды. Дархан кенет үнсіз қалды.",
-      "next": "forget"
+      "next": "forget",
+      "states": {
+        "darkhan": "fading"
+      }
     },
     "forget": {
       "speaker": "darkhan",
       "text": "Мен... кіммін? Қандай нан пісіруші едім... Есімде жоқ...",
-      "next": "react"
+      "next": "react",
+      "states": {
+        "darkhan": "fading"
+      }
     },
     "react": {
       "speaker": "me",
       "text": "Көлеңке оны жұтып жатыр. Не істеймін?",
       "choices": [
-        { "text": "Дархан, мені тыңда! Сен — Дарханссың!", "set": { "darkhan_called_name": true }, "next": "transform" },
-        { "text": "Артқа шегін, жақындама!", "next": "transform" }
+        {
+          "text": "Дархан, мені тыңда! Сен — Дарханссың!",
+          "set": {
+            "darkhan_called_name": true
+          },
+          "next": "transform"
+        },
+        {
+          "text": "Артқа шегін, жақындама!",
+          "next": "transform"
+        }
       ]
     },
     "transform": {
       "speaker": "narrator",
       "text": "Дарханның бет-әлпеті өшіп барады. Енді оның қолында тек пышақ қалды.",
-      "next": "the_end"
+      "next": "the_end",
+      "states": {
+        "darkhan": "shadow"
+      }
     },
-    "the_end": { "end": true }
+    "the_end": {
+      "end": true
+    }
   }
 }

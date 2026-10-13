@@ -1,0 +1,33 @@
+{
+  "parry_frames": 8,
+  "block_cooldown": 14,
+  "moves": {
+    "light": {
+      "startup": 5, "active": 3, "recovery": 10, "damage": 8,
+      "reach": [20, 85], "hit_y": [40, 130], "hitstun": 15, "hitstop": 4,
+      "knock": 9, "step": 3, "shake": 0.15, "arm": [0.0, -0.4, 1.5, 0.0], "lean": -6
+    },
+    "heavy": {
+      "startup": 15, "active": 4, "recovery": 22, "damage": 20,
+      "reach": [20, 112], "hit_y": [20, 150], "hitstun": 26, "hitstop": 8,
+      "knock": 22, "step": 4, "shake": 0.4, "arm": [0.4, 3.0, 1.3, 0.0], "lean": -12
+    },
+    "overhead": {
+      "startup": 34, "active": 4, "recovery": 26, "damage": 18,
+      "reach": [20, 105], "hit_y": [10, 160], "hitstun": 24, "hitstop": 7,
+      "knock": 20, "step": 5, "shake": 0.35, "arm": [0.5, 3.1, 1.3, 0.0], "lean": -10,
+      "weapon_len": 36, "tell_flag": "knows_overhead"
+    },
+    "slash": {
+      "startup": 24, "active": 4, "recovery": 24, "damage": 14,
+      "reach": [10, 120], "hit_y": [50, 120], "hitstun": 20, "hitstop": 6,
+      "knock": 16, "step": 6, "shake": 0.3, "arm": [0.2, -0.9, 1.65, 0.3], "lean": -8,
+      "weapon_len": 36, "tell_flag": "knows_tap"
+    }
+  },
+  "fighters": {
+    "player": { "hp": 100, "speed": 3.4, "moves": ["light", "heavy"], "accent": [110, 170, 230] },
+    "darkhan": { "hp": 120, "speed": 2.2, "moves": ["overhead", "slash"], "weapon": true,
+                 "accent": [230, 150, 50] }
+  }
+}

@@ -6,7 +6,12 @@
 Python 3 + PyGame. Диалоги и сейвы — JSON. Тесты — pytest. Сборка .exe — PyInstaller.
 
 ## Как запускать
-Пока нет кода (этап 0 в `docs/PLAN.md`). После каркаса: `pip install -r requirements.txt && python main.py`.
+`pip install -r requirements.txt && python main.py` (F11 — окно/полный экран, ESC — выход из меню). Тесты: `python -m pytest -q`.
+
+Код: пакет `kolenke/` (`core/` — цикл, сцены, ввод, ресурсы; `scenes/`; `data/` — JSON), `assets/fonts/`, `tests/`.
+
+## Решения
+- Язык игры и отчёта — казахский (строки в JSON, не в коде). Графика — только код. Полный экран, логика 1280×720.
 
 ## Правила работы
 - После каждого законченного рабочего шага: `git commit` с понятным сообщением и `git push`.

@@ -1,0 +1,121 @@
+{
+  "id": "night1",
+  "start": "n1",
+  "speakers": {
+    "narrator": "",
+    "me": "Мен",
+    "darkhan": "Дархан"
+  },
+  "memories": {
+    "m_bakery": {
+      "who": "darkhan",
+      "text": "Дархан наубайханада түнгі ауысымда істейді: қамырды пышақпен бөледі."
+    },
+    "m_overhead": {
+      "who": "darkhan",
+      "text": "Соққы алдында Дархан білегін бұрады: пышақ жоғарыдан төмен түседі."
+    },
+    "m_tap": {
+      "who": "darkhan",
+      "text": "Дархан үстелді екі рет қағады. Бұл — оның әдеті."
+    }
+  },
+  "nodes": {
+    "n1": {
+      "speaker": "narrator",
+      "text": "Буран үшінші сағат тынбай соғып тұр. Жатақханада жарық өшті, телефондар желіге қосылмайды.",
+      "next": "n2"
+    },
+    "n2": {
+      "speaker": "darkhan",
+      "text": "Қарашы, ештеңе көрінбейді. Бір ғана шам қалды.",
+      "next": "n3"
+    },
+    "n3": {
+      "speaker": "darkhan",
+      "text": "Мен наубайханадан енді ғана келдім. Қолымнан әлі қамырдың иісі шығады.",
+      "next": "n4"
+    },
+    "n4": {
+      "speaker": "me",
+      "text": "Дархан үнсіз отыр. Не айтамын?",
+      "choices": [
+        { "text": "Наубайханада не істейсің?", "next": "ask_work" },
+        { "text": "Қолыңа қарашы, дірілдеп тұр ғой.", "next": "ask_hands" },
+        { "text": "Ұйықта, таң атқанша күтейік.", "next": "sleep" }
+      ]
+    },
+    "ask_work": {
+      "speaker": "darkhan",
+      "text": "Түнгі ауысымда нан пісіремін. Қамырды кесіп, пышақпен бөлемін. Мың рет қайталағандықтан, көзімді жұмып та істей беремін.",
+      "set": { "asked_bakery": true },
+      "memory": "m_bakery",
+      "next": "ask_work2"
+    },
+    "ask_work2": {
+      "speaker": "me",
+      "text": "Қызық. Енді не сұраймын?",
+      "choices": [
+        {
+          "text": "Қалай кесетініңді көрсетші.",
+          "requires": { "asked_bakery": true },
+          "next": "show_knife"
+        },
+        { "text": "Қиын емес пе?", "next": "easy" }
+      ]
+    },
+    "show_knife": {
+      "speaker": "narrator",
+      "text": "Дархан ауада пышақ ұстағандай қолын көтеріп, білегін жеңіл бұрады да, жоғарыдан төмен түсіреді. Бұл қимыл оған өте таныс.",
+      "set": { "knows_overhead": true },
+      "memory": "m_overhead",
+      "next": "hands_common"
+    },
+    "easy": {
+      "speaker": "darkhan",
+      "text": "Әдеттегідей. Тек бүгін... бүгін бәрі басқаша.",
+      "next": "hands_common"
+    },
+    "ask_hands": {
+      "speaker": "darkhan",
+      "text": "Жоқ, суық қой. Бірдеңе істемесем, қолым тыныш тұрмайды.",
+      "next": "ask_hands2"
+    },
+    "ask_hands2": {
+      "speaker": "narrator",
+      "text": "Ол саусақтарымен үстелді екі рет қағады.",
+      "set": { "knows_tap": true },
+      "memory": "m_tap",
+      "next": "hands_common"
+    },
+    "sleep": {
+      "speaker": "darkhan",
+      "text": "Ұйықтай алмаймын. Сыртта бірдеңе бар сияқты...",
+      "next": "hands_common"
+    },
+    "hands_common": {
+      "speaker": "narrator",
+      "text": "Шам жыпылықтап, сөніп қалды. Дархан кенет үнсіз қалды.",
+      "next": "forget"
+    },
+    "forget": {
+      "speaker": "darkhan",
+      "text": "Мен... кіммін? Қандай нан пісіруші едім... Есімде жоқ...",
+      "next": "react"
+    },
+    "react": {
+      "speaker": "me",
+      "text": "Көлеңке оны жұтып жатыр. Не істеймін?",
+      "choices": [
+        { "text": "Дархан, мені тыңда! Сен — Дарханссың!", "set": { "called_name": true }, "next": "transform" },
+        { "text": "Артқа шегін, жақындама!", "next": "transform" }
+      ]
+    },
+    "transform": {
+      "speaker": "narrator",
+      "text": "Дарханның бет-әлпеті өшіп барады. Енді оның қолында тек пышақ қалды.",
+      "next": "the_end"
+    },
+    "the_end": { "end": true }
+  }
+}

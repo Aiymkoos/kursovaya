@@ -3,6 +3,8 @@ import pygame
 
 from kolenke.core.assets import Assets, load_strings
 from kolenke.core.input import InputBuffer, action_for_key
+from kolenke.story.flags import Flags
+from kolenke.story.journal import Journal
 
 LOGICAL_SIZE = (1280, 720)  # ішкі ажыратымдылық, экранға масштабталады
 FPS = 60
@@ -20,6 +22,12 @@ class Game:
         self.input = InputBuffer()
         self.scenes = []
         self.running = True
+        self.new_game_state()
+
+    def new_game_state(self):
+        """Жаңа ойын: флагтар мен журнал тазаланады."""
+        self.flags = Flags()
+        self.journal = Journal({})
 
     def _make_screen(self):
         flags = pygame.SCALED | (pygame.FULLSCREEN if self.fullscreen else 0)

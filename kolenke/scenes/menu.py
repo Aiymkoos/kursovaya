@@ -1,29 +1,13 @@
 """Басты мәзір және уақытша 1-түн сахнасы."""
 import pygame
 
+from kolenke.core.assets import ROOT
 from kolenke.core.scene import Scene
+from kolenke.scenes.dialogue import DialogueScene
 
 ACCENT = (200, 60, 60)  # бір акцентті түс
 WHITE = (230, 230, 230)
 GREY = (120, 120, 120)
-
-
-class StubScene(Scene):
-    """1-түн сахнасының орнына тұратын уақытша экран."""
-
-    def handle_action(self, action):
-        if action == "menu":
-            self.game.pop()
-
-    def draw(self, surface):
-        s = self.game.strings
-        big = self.game.assets.font(48, bold=True)
-        small = self.game.assets.font(22)
-        w, h = surface.get_size()
-        t = big.render(s["night_stub"], True, WHITE)
-        surface.blit(t, t.get_rect(center=(w // 2, h // 2)))
-        hint = small.render(s["back_hint"], True, GREY)
-        surface.blit(hint, hint.get_rect(center=(w // 2, h - 60)))
 
 
 class MenuScene(Scene):
@@ -37,7 +21,8 @@ class MenuScene(Scene):
         ]
 
     def _new_game(self):
-        self.game.push(StubScene(self.game))
+        self.game.new_game_state()
+        self.game.push(DialogueScene(self.game, ROOT / "kolenke" / "data" / "night1.json", night=1))
 
     def handle_action(self, action):
         if action == "up":

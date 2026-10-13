@@ -1,0 +1,74 @@
+module,qualname,params,purpose
+kolenke.core.game,Game.__init__,fullscreen,"Терезені, шрифттерді, дыбысты, сахналар стегін және ойын күйін дайындайды"
+kolenke.core.game,Game.start_night,n,"Түнді бастайды: түн нөмірін қояды, үшінші түнде бүліну деңгейін 0,25 етіп орнатады"
+kolenke.core.game,Game.tick_corruption,dt,3-түнде уақыт өткен сайын басты кейіпкердің бүліну деңгейін арттырады
+kolenke.core.game,Game.new_game_state,,"Жаңа ойын күйін дайындайды: флагтар, журнал, естелік қоры = 100"
+kolenke.core.game,Game.push,scene,"Сахнаны стекке қосып, жұмсақ ашылу эффектісін бастайды"
+kolenke.core.game,Game.pop,,"Үстіңгі сахнаны алып тастап, астындағы сахнаның on_resume әдісін шақырады"
+kolenke.core.game,Game.pop_to_menu,,"Стектегі барлық сахнаны жауып, мәзірге оралады"
+kolenke.core.game,Game.is_held,action,Перне қазір басулы ма (үздіксіз қозғалыс үшін)
+kolenke.core.game,Game.process_events,,"PyGame оқиғаларын әрекеттерге айналдырып, үстіңгі сахнаға береді"
+kolenke.core.game,Game.step,dt,"Бір кадр: оқиғалар, логика, сызу және ашылу эффектісі"
+kolenke.core.game,Game.run,,Негізгі цикл: Clock.tick(60) және step шақыру
+kolenke.core.input,action_for_key,key,Перне кодын әрекет атына түрлендіреді (KEYMAP кестесі бойынша)
+kolenke.core.input,InputBuffer.push,action,Әрекетті енгізу буферіне жазады
+kolenke.core.input,InputBuffer.tick,,"Кадр санағышын арттырып, терезеден шыққан әрекеттерді өшіреді"
+kolenke.core.input,InputBuffer.consume,action,"Буферде бар әрекетті алып тастап, True қайтарады"
+kolenke.core.save,save_game,"game, path",Ойын күйін JSON файлына атомдық түрде жазады
+kolenke.core.save,load_game,"game, path","Сақтауды тексеріп оқиды; бүлінген болса False қайтарады, күй өзгермейді"
+kolenke.core.save,has_save,path,Сақтау файлының бар-жоғын тексереді
+kolenke.core.save,delete_save,path,Финалдан кейін сақтауды жояды
+kolenke.core.audio,Audio.play,"name, volume",Синтезделген дыбысты ойнатады (кэштен)
+kolenke.core.audio,Audio.loop,"name, volume",Фондық дыбысты (боран) үзіліссіз қайталайды
+kolenke.core.audio,Audio.toggle_mute,,Дыбысты өшіреді немесе қосады (M пернесі)
+kolenke.core.audio,Audio.motif_for,"name, move","Кейіпкердің мотивін қайтарады: пышақ, барабан, тігін, метроном"
+kolenke.story.graph,DialogueGraph.validate,,"Графты тексереді: бастапқы түйін, өтулер, естеліктер, портрет күйлері, қол жетпейтін түйіндер"
+kolenke.story.graph,DialogueGraph.reachable,,Бастапқы түйіннен қол жететін түйіндер жиынын қайтарады
+kolenke.story.graph,DialogueRunner.advance,,Таңдауы жоқ түйіннен келесіге өтеді
+kolenke.story.graph,DialogueRunner.choose,visible_index,"Таңдауды орындайды: флагтар мен журнал жаңарады, келесі түйінге өтеді"
+kolenke.story.graph,DialogueRunner.choices,,Флаг шарттарына сай көрінетін таңдаулар тізімін қайтарады
+kolenke.story.flags,Flags.set,"name, value",Флагқа мән жазады
+kolenke.story.flags,Flags.get,"name, default",Флагтың мәнін қайтарады (жоқ болса default)
+kolenke.story.flags,Flags.check,requires,Барлық шарттың орындалуын тексереді ({флаг: мән})
+kolenke.story.journal,Journal.add,memory_id,Естеліктер журналына жазба қосады (қайталанбайды)
+kolenke.story.journal,Journal.entries,,Табылған жазбалар тізімін қайтарады
+kolenke.explore.player,Player.update,"dt, left, right, width","Жылдамдану, тежелу және локация шегін ескеріп қозғалысты жаңартады"
+kolenke.explore.locations,load_locations,path,"Локацияларды JSON-нан жүктеп, тексереді"
+kolenke.explore.locations,Obj.active,night,Нысан осы түнде белсенді ме
+kolenke.explore.locations,Obj.enemies,flags,Кейіпкермен өтетін шайқастар реті (диалогтан кейін анықталады)
+kolenke.combat.fighter,Fighter.update,"walk, cmd, hold_block, opp_x","Бір логикалық кадр: FSM күйін, қозғалыс пен буферден келген команданы өңдейді"
+kolenke.combat.fighter,Fighter.take_hit,"damage, hitstun, knock_dir, knock","Соққы алады: денсаулық, қатып қалу, итеріліс"
+kolenke.combat.fighter,Fighter.take_block,"damage, knock_dir, knock",Блокталған соққы: аз зиян және блоктан шығуды кідірту
+kolenke.combat.fighter,Fighter.get_staggered,frames,Парирленген жауды тепе-теңдігінен айырады
+kolenke.combat.hitbox,hitbox,"x, facing, move",Соққының зақымдау аймағын (тіктөртбұрыш) есептейді
+kolenke.combat.hitbox,hurtbox,x,Кейіпкердің қорғалатын аймағын қайтарады
+kolenke.combat.fight,Fight.tick,,"Бір логикалық кадр (1/60 с): енгізу, FSM, соққылар, hitstop, оқиғалар тізімі"
+kolenke.combat.fight,Fight._resolve,"atk, dfn","Соққыны тексереді: парирлеу, блок немесе тию; Event қайтарады"
+kolenke.combat.fight,Fight.usable,slot,Естелік слотын қазір қолдануға бола ма
+kolenke.combat.fight,Fight._use_memory,slot,"Естелікті қолданады: жылу, зейін немесе адамды қайтару"
+kolenke.combat.fight,PlayerController.decide,"fight, me, opp",Ойыншы енгізуін буфердің көмегімен командаға айналдырады
+kolenke.combat.setup,known_tells,"data, enemy, flags",Ойыншы танитын қарсылас қимылдарының жиынын анықтайды
+kolenke.combat.setup,fight_params,"flags, journal, reserve, enemy, data",Флагтар мен журналды Fight параметрлеріне айналдырады
+kolenke.combat.ai.markov,MarkovPredictor.predict,,Келесі әрекетті және оның ықтималдығын болжайды (backoff + Лаплас)
+kolenke.combat.ai.markov,MarkovPredictor.observe,action,"Шын әрекетті жазып, болжам дұрыстығын журналға түсіреді"
+kolenke.combat.ai.adaptive,AdaptiveAI.decide,"fight, me, opp","Қарсыластың шешімі: қорғану, фінт, жазалау немесе қарапайым шабуыл"
+kolenke.combat.ai.adaptive,AdaptiveAI._observe,"fight, player","Ойыншының жаңа әрекетін байқап, болжамға салыстырады"
+kolenke.combat.ai.metrics,online_accuracy,"sequence, predictor",Тізбек бойынша болжау дәлдігін және оқу қисығын есептейді
+kolenke.combat.ai.metrics,compare,sequence,Барлық әдістің дәлдігін бір сөздікте қайтарады
+kolenke.render.lighting,Lighting.render,"screen, lights, cam_x, t, offset",Жарықтандыру: қараңғы қабат пен жарық дақтарын сахнаға көбейтеді
+kolenke.render.lighting,make_vignette,"size, strength",Виньетка бетін жасайды
+kolenke.render.portrait,build_portrait,"name, state","Портрет бетін жасап, кэштейді (human, fading, shadow)"
+kolenke.render.portrait,draw_portrait,"surface, name, state, cx, bottom, t, active, scale",Портретті жарқылымен және тыныс қозғалысымен сызады
+kolenke.render.corruption,draw_corruption,"surface, level, t","3-түнде экранды қараңғылатып, жоғалу жолақтарын сызады"
+kolenke.render.corruption,hidden,"level, threshold",Интерфейс элементі осы деңгейде жасырылады ма
+kolenke.render.effects,Fade.start,"callback, duration","Қараңғыға өшіп, callback орындап, қайта ашылады"
+kolenke.render.effects,ScreenShake.add,amount,Экран дірілін күшейтеді
+kolenke.scenes.fight,FightScene.update,dt,"Бекітілген қадаммен логиканы жүргізеді, баяулау мен эффектілерді басқарады"
+kolenke.scenes.fight,FightScene._on_event,ev,"Жекпе-жек оқиғасына дыбыс, діріл, зум, бөлшектер қосады"
+kolenke.scenes.fight,FightScene._finish,,"Нәтижені (saved/killed) флагтарға жазады, естелік қорын азайтады"
+kolenke.scenes.explore,ExploreScene.interactables,,Жақын тұрған белсенді есіктер мен кейіпкерлер
+kolenke.scenes.explore,ExploreScene.night_complete,,Түннің барлық диалогы мен шайқасы аяқталды ма
+kolenke.scenes.dialogue,DialogueScene.handle_action,action,"Space, 1–4, Tab, ESC әрекеттерін өңдейді"
+kolenke.scenes.dialogue,glitch,"text, level, t, node_id",3-түнде мәтіннің кейбір әріптерін жояды
+kolenke.scenes.night_end,saved_count,flags,Құтқарылған достар санын санайды
+kolenke.scenes.night_end,ending_key,count,Құтқарылғандар санына қарай финал кілтін қайтарады

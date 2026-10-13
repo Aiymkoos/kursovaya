@@ -1,0 +1,85 @@
+module,name,type,meaning
+kolenke.core.game,LOGICAL_SIZE,тұрақты,"Ойынның ішкі ажыратымдылығы (1280, 720); экранға масштабталады"
+kolenke.core.game,FPS,тұрақты,Кадр жиілігі: 60 кадр/с
+kolenke.core.game,FADE_IN,тұрақты,"Сахнаға өткендегі жұмсақ ашылу ұзақтығы, секунд"
+kolenke.core.game,Game,класс,"Ойын циклі, сахналар стегі және ойын күйі"
+kolenke.core.game,Game.held,атрибут,Қазір басулы әрекеттер жиыны
+kolenke.core.game,Game.reserve,атрибут,Естелік қоры (бастапқы мәні 100); адамды қайтарған сайын азаяды
+kolenke.core.game,Game.night,атрибут,Қазіргі түн нөмірі (1–3)
+kolenke.core.game,Game.corruption,атрибут,"Басты кейіпкердің бүліну деңгейі, 0…1 (үшінші түнде өседі)"
+kolenke.core.game,Game.flags,атрибут,Ойыншы таңдауларының флагтары
+kolenke.core.game,Game.journal,атрибут,Естеліктер журналы
+kolenke.core.input,KEYMAP,тұрақты,Перне кодтарын әрекет аттарына сәйкестендіру кестесі
+kolenke.core.input,InputBuffer,класс,Соңғы 6 кадрдағы әрекеттерді сақтайтын енгізу буфері
+kolenke.core.assets,ROOT,тұрақты,Ресурстар қалтасы (PyInstaller-де sys._MEIPASS)
+kolenke.core.assets,Assets,класс,Шрифттер кэші
+kolenke.core.save,VERSION,тұрақты,Сақтау файлының пішім нұсқасы
+kolenke.core.audio_synth,RATE,тұрақты,Дыбыс жиілігі: 22050 Гц
+kolenke.core.audio_synth,SOUNDS,тұрақты,Дыбыс атаулары мен синтез функцияларының сөздігі
+kolenke.core.audio,MOTIF,тұрақты,"Кейіпкер мотивтері: пышақ, барабан, тігін, метроном"
+kolenke.story.graph,VALID_STATES,тұрақты,"Портрет күйлері: human, fading, shadow"
+kolenke.story.graph,VALID_BG,тұрақты,Диалог фонына рұқсат етілген бөлмелер
+kolenke.story.graph,DialogueGraph,класс,Түйіндер мен таңдау бұтақтарынан тұратын диалог графы
+kolenke.story.graph,DialogueRunner,класс,"Графпен жүру: флагтар, журнал және портрет күйлерін жаңарту"
+kolenke.story.graph,GraphError,класс,Граф қатесі (тексеру кезінде)
+kolenke.story.flags,Flags,класс,Флагтар сөздігі және шартты тексеру
+kolenke.story.journal,Journal,класс,Естеліктер журналы
+kolenke.explore.player,SPEED,тұрақты,"Жүрудің ең жоғары жылдамдығы, px/с"
+kolenke.explore.player,ACCEL,тұрақты,Жылдамдану мен тежелу қарқыны
+kolenke.explore.player,MARGIN,тұрақты,"Локация шетінен қашықтық, px"
+kolenke.explore.locations,Obj,класс,Локация нысаны: есік немесе кейіпкер
+kolenke.explore.locations,Location,класс,Жатақхана локациясы
+kolenke.combat.fighter,ARENA,тұрақты,"Жекпе-жек алаңының шектері, px"
+kolenke.combat.fighter,Fighter,класс,Кадрлық FSM-мен жұмыс істейтін жауынгер
+kolenke.combat.fighter,Fighter.state,атрибут,"FSM күйі: idle, block, соққы атауы, hurt, stagger, dead"
+kolenke.combat.fighter,Fighter.frame,атрибут,Күйдегі кадр нөмірі
+kolenke.combat.fighter,Fighter.hp,атрибут,Денсаулық
+kolenke.combat.fighter,Fighter.memory,атрибут,Естелік жолағының мәні
+kolenke.combat.fighter,Fighter.stun,атрибут,Қатып қалу немесе блоктан шығуды кідірту ұзақтығы
+kolenke.combat.fighter,Fighter.has_hit,атрибут,Қазіргі соққы тиіп қойды ма (бір соққы бір рет тиеді)
+kolenke.combat.fighter,Fighter.block_cooldown,атрибут,Парирлеуді қайталап басуға тыйым салатын кулдаун
+kolenke.combat.hitbox,GROUND,тұрақты,"Кейіпкер табаны тұратын сызық, px"
+kolenke.combat.hitbox,HURT_W,тұрақты,"hurtbox ені, px"
+kolenke.combat.hitbox,HURT_H,тұрақты,"hurtbox биіктігі, px"
+kolenke.combat.fight,Event,класс,"Жекпе-жек оқиғасы: hit, block, parry, ko, mem_heal, mem_focus, restore"
+kolenke.combat.fight,Fight,класс,Жекпе-жек ядросы
+kolenke.combat.fight,Fight.hitstop,атрибут,Соққыдан кейінгі қатып қалу кадрлары
+kolenke.combat.fight,Fight.focus_left,атрибут,«Зейін» эффектісінің қалған кадрлары
+kolenke.combat.fight,Fight.outcome,атрибут,"Нәтиже: kill, restore немесе lose"
+kolenke.combat.fight,STAGGER_BONUS,тұрақты,"Парирленген жауға қосымша зиян көбейткіші (1,5)"
+kolenke.combat.fight,PARRY_MEMORY_GAIN,тұрақты,Сәтті парирлеу берген естелік (15)
+kolenke.combat.fight,MEMORY_COST,тұрақты,Бір естелік слотының бағасы (33)
+kolenke.combat.fight,HEAL_AMOUNT,тұрақты,«Жылу» естелігінің емдеуі (25)
+kolenke.combat.fight,FOCUS_BASE,тұрақты,«Зейін» ұзақтығы кадрмен (180)
+kolenke.combat.fight,FOCUS_PARRY_BONUS,тұрақты,Парирлеу терезесіне қосымша кадр (6)
+kolenke.combat.fight,RESTORE_HP_FRACTION,тұрақты,Қайтару үшін қарсылас денсаулығының шегі (35%)
+kolenke.combat.fight,UNKNOWN_TELL_SPEEDUP,тұрақты,"Белгісіз қимылдың дайындығы жылдамдауы (×0,7)"
+kolenke.combat.setup,START_MEMORY_FRACTION,тұрақты,Шайқас басындағы естелік жолағы = қордың жартысы
+kolenke.combat.setup,CALLED_NAME_HP_MULT,тұрақты,"Атын атаған жаудың денсаулық көбейткіші (0,85)"
+kolenke.combat.setup,RESTORE_RESERVE_COST,тұрақты,Адамды қайтарудың естелік қорына бағасы (25)
+kolenke.combat.ai.markov,ACTIONS,тұрақты,"Болжанатын әрекеттер: light, heavy, block"
+kolenke.combat.ai.markov,MarkovPredictor,класс,Жиілік кестесі бойынша келесі әрекетті болжау
+kolenke.combat.ai.adaptive,NIGHT_THRESHOLD,тұрақты,"Түндер бойынша болжам сенім шегі: 0,70; 0,55; 0,45"
+kolenke.combat.ai.adaptive,ANTICIPATED_DELAY,тұрақты,Болжам дұрыс болғанда реакция кідірісі (0–3 кадр)
+kolenke.combat.ai.adaptive,UNANTICIPATED_DELAY,тұрақты,Болжам қате болғанда реакция кідірісі (16–24 кадр)
+kolenke.combat.ai.adaptive,AdaptiveAI,класс,Бейімделгіш қарсылас ИИ
+kolenke.render.scenery,WALL_BOTTOM,тұрақты,"Қабырға мен еденнің шекарасы, px"
+kolenke.render.scenery,Scenery,класс,"Алдын ала сызылған локация фоны, терезелер және жарықтар"
+kolenke.render.portrait,CHARACTERS,тұрақты,Кейіпкерлердің акцент түстері
+kolenke.render.portrait,STATE_DETAIL,тұрақты,Портрет күйлеріне сәйкес детальдылық деңгейі
+kolenke.render.particles,ParticleSystem,класс,"Бөлшектер жүйесі: ұшқын, шаң, көлеңке бөлшектері"
+kolenke.render.particles,Blizzard,класс,Боран бөлшектері
+kolenke.render.effects,Fade,класс,Қараңғыға өту эффектісі
+kolenke.render.effects,ScreenShake,класс,Экран дірілі (trauma әдісі)
+kolenke.scenes.fight,TICK,тұрақты,Логикалық қадам: 1/60 с
+kolenke.scenes.fight,SLOW_SCALE,тұрақты,"Парирлеудегі уақыт баяулау коэффициенті (0,25)"
+kolenke.scenes.fight,ARENA_ROOM,тұрақты,Қарсылас пен жекпе-жек бөлмесінің сәйкестігі
+kolenke.scenes.fight,FightScene,класс,Жекпе-жек сахнасы
+kolenke.scenes.dialogue,CHARS_PER_SEC,тұрақты,Мәтін теру жылдамдығы (60 таңба/с)
+kolenke.scenes.dialogue,DialogueScene,класс,Диалог сахнасы (визуалды новелла)
+kolenke.scenes.dialogue,JournalScene,класс,Естеліктер журналы сахнасы
+kolenke.scenes.explore,ExploreScene,класс,Жатақханада жүру сахнасы
+kolenke.scenes.night_end,FRIENDS,тұрақты,Төрт достың идентификаторлары
+kolenke.scenes.night_end,NIGHT_FRIENDS,тұрақты,Әр түндегі айналатын достар
+kolenke.scenes.night_end,NightEndScene,класс,Түн қорытындысы
+kolenke.scenes.night_end,EndingScene,класс,Финал сахнасы

@@ -15,7 +15,7 @@ from matplotlib.patches import Ellipse, FancyBboxPatch, Polygon, Rectangle, Path
 from matplotlib.path import Path as MPath
 
 LW = 1.1
-FONT = 6.6
+FONT = 7.5
 
 
 # ---------- фигуралар ----------
@@ -45,7 +45,7 @@ def inout(ax, x, y, s, w=22, h=11, k=2.6):
 def decision(ax, x, y, s, w=24, h=14):
     ax.add_patch(Polygon([(x, y + h / 2), (x + w / 2, y), (x, y - h / 2), (x - w / 2, y)],
                          closed=True, fc="white", ec="black", lw=LW))
-    txt(ax, x, y, s, size=FONT - 0.4)
+    txt(ax, x, y, s, size=FONT - 0.8)
 
 
 def popup(ax, x, y, s, w=22, h=11, k=3.0):
@@ -82,7 +82,7 @@ def cylinder(ax, x, y, s, w=22, h=11):
     ax.plot([x - w / 2, x - w / 2], [y - h / 2 + ry, y + h / 2 - ry], "k", lw=LW)
     ax.plot([x + w / 2, x + w / 2], [y - h / 2 + ry, y + h / 2 - ry], "k", lw=LW)
     ax.add_patch(Ellipse((x, y + h / 2 - ry), w, 2 * ry, fc="white", ec="black", lw=LW))
-    txt(ax, x, y - 0.4, s)
+    txt(ax, x, y - 1.3, s)
 
 
 def internal(ax, x, y, s, w=22, h=11):
@@ -115,10 +115,10 @@ def line(ax, pts, arrow=True, both=False, dashed=False, label=None, lpos=None):
 
 # ---------- функционалдық сызба ----------
 def functional(path):
-    fig = plt.figure(figsize=(11.69, 8.27), dpi=200)
+    fig = plt.figure(figsize=(11.69, 7.89), dpi=200)
     ax = fig.add_axes([0.01, 0.01, 0.98, 0.98])
     ax.set_xlim(0, 160)
-    ax.set_ylim(0, 113)
+    ax.set_ylim(2, 110)
     ax.axis("off")
     X = [20, 45, 70, 95, 120, 145]
     R1, R2, R3, R4, R5 = 102, 82, 62, 42, 22

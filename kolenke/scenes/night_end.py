@@ -4,7 +4,7 @@ import math
 
 import pygame
 
-from kolenke.core.assets import ROOT
+from kolenke.core.assets import ROOT, load_image
 from kolenke.core.save import delete_save, save_game
 from kolenke.core.scene import Scene
 from kolenke.core.text import wrap_text
@@ -122,6 +122,9 @@ class EndingScene(Scene):
         top = tuple(int(a + (b - a) * d) for a, b in zip((8, 10, 18), (250, 170, 110)))
         bot = tuple(int(a + (b - a) * d) for a, b in zip((20, 24, 38), (255, 225, 170)))
         self.bg = _gradient((w, h), top, bot)
+        art = load_image("bg/ending_%d" % (1 if self.count == 0 else 2 if self.count < 3 else self.count), (w, h))
+        if art is not None:                                  # дайын финал суреті болса
+            self.bg = art
         self.snow = Blizzard(w, h, count=int(160 * (1 - 0.7 * d)), wind=-100, seed=5)
 
     def on_enter(self):

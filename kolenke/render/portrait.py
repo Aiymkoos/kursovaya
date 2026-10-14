@@ -11,6 +11,8 @@ import random
 
 import pygame
 
+from kolenke.core.assets import load_image
+
 W, H = 520, 700            # соңғы өлшем
 S = 2                      # супер-семплинг
 BODY = (10, 10, 16)
@@ -266,6 +268,12 @@ def build_portrait(name, state):
     if key in _cache:
         return _cache[key]
     accent = CHARACTERS[name]
+    art = load_image(f"portraits/{name}_{state}", (W, H), cover=False)   # дайын сурет болса
+    if art is not None:
+        canvas = pygame.Surface((W, H), pygame.SRCALPHA)
+        canvas.blit(art, art.get_rect(midbottom=(W // 2, H)))
+        _cache[key] = canvas
+        return canvas
     big = pygame.Surface((W * S, H * S), pygame.SRCALPHA)
     # контр-жарық жиегі: бейненің жылжытылған көшірмесі акцент түсімен
     rim = pygame.Surface((W * S, H * S), pygame.SRCALPHA)

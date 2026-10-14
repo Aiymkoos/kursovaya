@@ -3,7 +3,7 @@ import random
 
 import pygame
 
-from kolenke.core.assets import ROOT
+from kolenke.core.assets import BG_FILES, ROOT, load_image
 from kolenke.core.scene import Scene
 from kolenke.core.text import wrap_text
 from kolenke.explore.locations import Location
@@ -26,6 +26,10 @@ _bg_cache = {}
 def blurred_room(room, size):
     """Бөлме фоны: жарықтандырылып, бұлыңғыр етіледі (новелла фоны)."""
     key = (room, size)
+    if key not in _bg_cache and room in BG_FILES:
+        art = load_image("bg/" + BG_FILES[room], size)      # дайын сурет болса — сол қолданылады
+        if art is not None:
+            _bg_cache[key] = art
     if key not in _bg_cache:
         w, h = size
         sc = build_scenery(Location(room, w, "", w // 2, []))

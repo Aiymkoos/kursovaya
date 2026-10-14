@@ -3,6 +3,7 @@ import math
 
 import pygame
 
+from kolenke.core.assets import load_image
 from kolenke.core.save import has_save, load_game
 from kolenke.core.scene import Scene
 from kolenke.render.lighting import make_vignette
@@ -35,7 +36,8 @@ class MenuScene(Scene):
         self.t = 0.0
         w, h = game.screen.get_size()
         self.size = (w, h)
-        self.bg = blurred_room("darkhan_room", self.size)
+        self.art = load_image("bg/menu_art", self.size)         # дайын заставка болса
+        self.bg = self.art if self.art is not None else blurred_room("darkhan_room", self.size)
         self.snow = Blizzard(w, h, count=220, wind=-220, seed=21)
         self.vignette = make_vignette((w, h))
         self.title = _glow_text(game.assets.font(110, bold=True), game.strings["title"],
@@ -87,8 +89,9 @@ class MenuScene(Scene):
         w, h = self.size
         surface.blit(self.bg, (0, 0))
         self.snow.draw(surface, brightness=0.55)
-        draw_portrait(surface, "me", "human", 250, h + 60, self.t, True, 0.95)
-        draw_portrait(surface, "darkhan", "shadow", w - 250, h + 60, self.t + 1, True, 0.95)
+        if self.art is None:
+            draw_portrait(surface, "me", "human", 250, h + 60, self.t, True, 0.95)
+            draw_portrait(surface, "darkhan", "shadow", w - 250, h + 60, self.t + 1, True, 0.95)
         surface.blit(self.vignette, (0, 0))
         base, blur, pad = self.title
         pulse = 0.75 + 0.25 * math.sin(self.t * 1.7)

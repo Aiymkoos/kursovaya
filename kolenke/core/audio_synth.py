@@ -169,6 +169,33 @@ def blizzard(duration=4.0, seed=13):
     return _pack(out)
 
 
+def step(seed=31):
+    """Жұмсақ қадам: төмен «тұп» және қысқа сыбдыр (еден тақтайы)."""
+    rng = random.Random(seed)
+    lp = 0.0
+    out = []
+    for i in range(_n(0.14)):
+        lp += (_noise(rng) - lp) * 0.25
+        out.append((math.sin(2 * math.pi * 85 * i / RATE) * math.exp(-i / RATE * 38) * 0.8
+                    + lp * math.exp(-i / RATE * 60) * 0.5))
+    return _pack(out)
+
+
+def door(seed=32):
+    """Ағаш есік: екі баяу соққы, соңында сықыр."""
+    rng = random.Random(seed)
+    out = [0.0] * _n(0.55)
+    for start, amp in ((0.0, 0.8), (0.17, 0.55)):
+        s = int(start * RATE)
+        for i in range(_n(0.2)):
+            out[s + i] += (math.sin(2 * math.pi * 120 * i / RATE) + 0.4 * _noise(rng)) * math.exp(-i / RATE * 22) * amp
+    s = int(0.28 * RATE)
+    for i in range(_n(0.25)):
+        f = 300 + 180 * (i / _n(0.25))
+        out[s + i] += math.sin(2 * math.pi * f * i / RATE) * math.sin(math.pi * i / _n(0.25)) * 0.12
+    return _pack(out)
+
+
 def music(duration=24.0, seed=21):
     """Фондық музыка: ля минордағы баяу аккордтар (Am–F–C–G), алыстан естілетін қоңыраулар.
 
@@ -208,5 +235,5 @@ SOUNDS = {
     "parry": parry, "whoosh": whoosh, "whoosh_light": lambda: whoosh(True, 0.16),
     "chime": chime, "boom": boom, "swell": swell, "tick": lambda: tick(False),
     "tock": lambda: tick(True), "drum": drum, "knife": knife, "stitch": stitch,
-    "click": click, "blizzard": blizzard, "music": music,
+    "click": click, "blizzard": blizzard, "music": music, "step": step, "door": door,
 }

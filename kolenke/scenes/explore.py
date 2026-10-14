@@ -147,6 +147,7 @@ class ExploreScene(Scene):
                 return
             self.game.audio.play("click", 0.6)
             if obj.kind == "door":
+                self.game.audio.play("door", 0.7)
                 self.fade.start(lambda o=obj: self._go(o))
             elif obj.kind == "npc":
                 if self._talk_done(obj):
@@ -173,7 +174,8 @@ class ExploreScene(Scene):
         if not self.fade.active:
             self.player.update(dt, g.is_held("left"), g.is_held("right"), self.loc.width)
         sw = self.player.swing
-        if self.player.moving and sw * self._last_swing < 0:  # қадам -> шаң
+        if self.player.moving and sw * self._last_swing < 0:  # қадам -> шаң және дыбыс
+            self.game.audio.play("step", 0.22)
             for k in range(3):
                 self.dust.emit(self.player.x - self.player.facing * 8, GROUND - 4,
                                -self.player.facing * 30 + (hash((self.t, k)) % 40 - 20),

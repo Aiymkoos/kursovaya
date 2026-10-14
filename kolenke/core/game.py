@@ -1,4 +1,6 @@
 """Негізгі ойын циклі: 60 FPS, сахналар стегі, толық экран."""
+import sys
+
 import pygame
 
 from kolenke.combat.fighter import load_combat_data
@@ -11,6 +13,7 @@ from kolenke.story.journal import Journal
 
 LOGICAL_SIZE = (1280, 720)  # ішкі ажыратымдылық, экранға масштабталады
 FPS = 60
+IS_WEB = sys.platform == "emscripten"   # pygbag: браузерде жұмыс істеп тұр
 FADE_IN = 0.45
 
 
@@ -51,10 +54,14 @@ class Game:
         self.corruption = 0.0  # 3-түнде басты кейіпкердің өзі айнала бастайды (0..1)
 
     def _make_screen(self):
+        if IS_WEB:        # браузерде кенепті HTML өзі масштабтайды
+            return pygame.display.set_mode(LOGICAL_SIZE)
         flags = pygame.SCALED | (pygame.FULLSCREEN if self.fullscreen else 0)
         return pygame.display.set_mode(LOGICAL_SIZE, flags)
 
     def toggle_fullscreen(self):
+        if IS_WEB:
+            return
         self.fullscreen = not self.fullscreen
         pygame.display.toggle_fullscreen()
 
@@ -130,4 +137,19 @@ class Game:
         while self.running and self.scenes:
             dt = self.clock.tick(FPS) / 1000.0
             self.step(dt)
+        pygame.quit()
+
+    async def run_async(self):
+        """Браузер нұсқасы (pygbag): әр кадрдан кейін басқаруды браузерге қайтарады."""
+        import asyncio
+        import time
+        frames, t0 = 0, time.perf_counter()
+        while self.running and self.scenes:
+            dt = self.clock.tick(FPS) / 1000.0
+            self.step(dt)
+            frames += 1
+            if time.perf_counter() - t0 >= 5.0:      # браузер консолінде FPS көрінеді
+                print(f"FPS {frames / (time.perf_counter() - t0):.1f}")
+                frames, t0 = 0, time.perf_counter()
+            await asyncio.sleep(0)
         pygame.quit()

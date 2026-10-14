@@ -72,7 +72,10 @@ class NightEndScene(Scene):
         g = self.game
         if self.night < 3:
             g.start_night(self.night + 1)
-            save_game(g)
+            try:
+                save_game(g)
+            except OSError:      # жазу мүмкін болмаса (мысалы, браузер) ойын жалғаса береді
+                pass
             g.pop()          # ExploreScene.on_resume жаңа түнді бастайды
         else:
             g.pop()

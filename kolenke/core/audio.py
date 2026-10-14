@@ -4,7 +4,10 @@
 """
 import pygame
 
+from kolenke.core.assets import ROOT
 from kolenke.core.audio_synth import RATE, SOUNDS
+
+AUDIO_DIR = ROOT / "assets" / "audio"   # алдын ала жасалған .wav (браузер нұсқасы үшін)
 
 # Кейіпкер мотиві: шайқас/диалогта қайталанатын дыбыс (ТЗ: пышақ, барабан, тігін, метроном)
 MOTIF = {"darkhan": "knife", "zhanel": "drum", "madina": "stitch", "bekzat": "tick"}
@@ -31,7 +34,11 @@ class Audio:
         if name not in SOUNDS:
             raise KeyError(f"Белгісіз дыбыс: {name}")
         if name not in self._cache:
-            self._cache[name] = pygame.mixer.Sound(buffer=SOUNDS[name]())
+            wav = AUDIO_DIR / f"{name}.wav"
+            if wav.exists():          # дайын файл (синтезді күтпей, жылдам жүктеледі)
+                self._cache[name] = pygame.mixer.Sound(str(wav))
+            else:
+                self._cache[name] = pygame.mixer.Sound(buffer=SOUNDS[name]())
         return self._cache[name]
 
     def play(self, name, volume=1.0):

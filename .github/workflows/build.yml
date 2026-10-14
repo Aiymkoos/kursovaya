@@ -1,0 +1,112 @@
+name: Build and deploy
+
+on:
+  push:
+    branches: ["main", "claude/elegant-galileo-wj9iod"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Tests
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+        run: python -m pytest -q
+
+  windows-exe:
+    needs: tests
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt pyinstaller
+      - run: python -m PyInstaller --noconfirm --clean kolenke.spec
+      - name: Self-test the built exe (headless, on real Windows)
+        shell: pwsh
+        run: |
+          $env:SDL_VIDEODRIVER = "dummy"
+          $env:SDL_AUDIODRIVER = "dummy"
+          $env:KOLENKE_SELFTEST_OUT = "$PWD\selftest.txt"
+          $p = Start-Process -FilePath "dist\Kolenke.exe" -ArgumentList "--selftest" -PassThru
+          if (-not $p.WaitForExit(120000)) { $p.Kill(); throw "exe selftest timed out" }
+          if (-not (Test-Path selftest.txt)) { throw "exe selftest produced no result" }
+          Get-Content selftest.txt
+          if ((Get-Content selftest.txt -Raw) -notmatch "SELFTEST OK") { throw "exe selftest failed" }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Kolenke-windows
+          path: dist/Kolenke.exe
+      - name: Publish release (Kolenke.exe)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete latest --cleanup-tag --yes || true
+          gh release create latest dist/Kolenke.exe \
+            --title "Kolenke (Windows .exe, latest build)" \
+            --notes "Автоматты жинау. Kolenke.exe файлын жүктеп алып, екі рет шертіп іске қосыңыз (Python керек емес). Windows қорғаныс терезесі шықса: «Қосымша мәлімет» → «Бәрібір іске қосу»." \
+            --target "${{ github.sha }}" --prerelease
+
+  web:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pygbag pillow playwright
+      - name: Prepare web package
+        run: |
+          mkdir pkg
+          cp main.py pkg/
+          cp -r kolenke assets pkg/
+          python tools/make_audio.py pkg/assets/audio
+      - name: Build with pygbag
+        run: python -m pygbag --build --app_name kolenke --title "Көлеңке" pkg
+      - run: ls -la pkg/build/web
+      - name: Smoke test in real Chromium
+        continue-on-error: true
+        run: |
+          playwright install --with-deps chromium
+          python tools/web_smoke.py pkg/build/web 60
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: web-smoke
+          path: web-smoke.png
+          if-no-files-found: ignore
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: pkg/build/web
+
+  deploy:
+    needs: web
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -13,6 +13,7 @@ from kolenke.render.lighting import Lighting, make_vignette
 from kolenke.render.particles import Blizzard, ParticleSystem
 from kolenke.render.scenery import GROUND, build_scenery
 from kolenke.render.silhouette import draw_silhouette
+from kolenke.render.sprite import draw_sprite, has_sprite
 from kolenke.render.ui import draw_journal_counter, draw_night_indicator
 from kolenke.scenes.dialogue import DialogueScene, JournalScene
 from kolenke.scenes.fight import FightScene
@@ -194,12 +195,11 @@ class ExploreScene(Scene):
             pygame.draw.line(surface, (10, 12, 16), (r.left, r.centery), (r.right, r.centery), 4)
         npcs = [o for o in self.loc.objects if o.kind == "npc" and self._visible_npc(o)]
         for o in npcs:
-            draw_silhouette(surface, o.x - cam, GROUND, o.accent, facing=-1,
-                            t=self.t, part="body")
+            self._actor(surface, o.who, o.x - cam, o.accent, -1, 0.0, "body")
         p = self.player
         c = self.game.corruption
-        draw_silhouette(surface, p.x - cam, GROUND, PLAYER_ACCENT, p.facing,
-                        p.swing, t=self.t, part="body")
+        self._actor(surface, "me", p.x - cam, PLAYER_ACCENT, p.facing, p.swing, "body",
+                    detail=protagonist_detail(c))
         self.dust.draw(surface, cam)
 
         lights = sc.lights + [dict(x=p.x, y=GROUND - 150, r=320, color=(190, 215, 255),
@@ -208,10 +208,9 @@ class ExploreScene(Scene):
         self.lighting.render(surface, lights, cam, self.t)
 
         for o in npcs:  # акцент жарықтан кейін — «жарқырайды»
-            draw_silhouette(surface, o.x - cam, GROUND, o.accent, facing=-1,
-                            t=self.t, part="accent")
-        draw_silhouette(surface, p.x - cam, GROUND, PLAYER_ACCENT, p.facing, p.swing,
-                        t=self.t, part="accent", detail=protagonist_detail(c))
+            self._actor(surface, o.who, o.x - cam, o.accent, -1, 0.0, "accent")
+        self._actor(surface, "me", p.x - cam, PLAYER_ACCENT, p.facing, p.swing, "accent",
+                    detail=protagonist_detail(c))
         for px in sc.pillars:  # алдыңғы план: параллакс 1.25x
             sx = int(px - self.cam * 1.25)
             if -100 < sx < w:
@@ -221,6 +220,16 @@ class ExploreScene(Scene):
         draw_corruption(surface, c, self.t)
         self._draw_hud(surface, cam)
         self.fade.draw(surface)
+
+    def _actor(self, surface, name, x, accent, facing, swing, part, detail=1.0):
+        """Кейіпкер: assets/sprites/<аты>.png бар болса сурет (жарықтандыруға дейін),
+        болмаса код сызған силуэт (дене — жарыққа дейін, акцент — кейін)."""
+        if has_sprite(name):
+            if part == "body":
+                draw_sprite(surface, name, x, GROUND, facing, swing, self.t, detail)
+            return
+        draw_silhouette(surface, x, GROUND, accent, facing=facing, swing=swing,
+                        t=self.t, part=part, detail=detail if part == "accent" else 1.0)
 
     def _draw_hud(self, surface, cam):
         s, a = self.game.strings, self.game.assets

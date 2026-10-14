@@ -58,6 +58,15 @@ def _variant(name, facing, detail):
     return _tinted[key]
 
 
+def figure(name, facing=1, detail=1.0, height=None):
+    """Дайын бет (бағыты мен күңгірттенуі ескеріледі); height берілсе — сол биіктікке масштабталады."""
+    img = _variant(name, facing, detail)
+    if height and height != img.get_height():
+        img = pygame.transform.smoothscale(
+            img, (max(1, round(img.get_width() * height / img.get_height())), int(height)))
+    return img
+
+
 def _shadow(width):
     key = int(width)
     if key not in _shadows:

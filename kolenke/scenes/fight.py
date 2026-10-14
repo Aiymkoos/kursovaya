@@ -16,7 +16,8 @@ from kolenke.core.scene import Scene
 from kolenke.explore.locations import Location
 from kolenke.render.corruption import draw_corruption, hidden, protagonist_detail
 from kolenke.render.effects import ScreenShake
-from kolenke.render.fighter_draw import draw_fighter
+from kolenke.render.artscene import AMBIENT as ART_AMBIENT, ArtBackdrop
+from kolenke.render.fighter_draw import draw_fighter, draw_fighter_sprite, has_fighter_sprite
 from kolenke.render.lighting import Lighting, make_vignette
 from kolenke.render.particles import Blizzard, ParticleSystem
 from kolenke.render.scenery import build_scenery
@@ -45,7 +46,9 @@ class FightScene(Scene):
         self.size = (w, h)
         self.canvas = pygame.Surface((w, h))
         room = ARENA_ROOM.get(enemy, "darkhan_room")
-        self.scenery = build_scenery(Location(room, w, "", w // 2, []))
+        loc = Location(room, w, "", w // 2, [])
+        self.art = ArtBackdrop.load(loc, (w, h))                 # дайын сурет фоны (болмаса — код)
+        self.scenery = None if self.art else build_scenery(loc)
         self.lighting = Lighting((w, h))
         self.vignette = make_vignette((w, h))
         self.blizzard = Blizzard(w, h, count=260, wind=-180)
@@ -239,35 +242,47 @@ class FightScene(Scene):
         c = self.canvas
         w, h = self.size
         sc = self.scenery
-        c.blit(sc.surface, (0, 0))
-        for wnd in sc.windows:
-            prev = c.get_clip()
-            c.set_clip(wnd)
-            self.blizzard.draw(c, brightness=0.9)
-            c.set_clip(prev)
-            pygame.draw.line(c, (10, 12, 16), (wnd.centerx, wnd.top), (wnd.centerx, wnd.bottom), 4)
-            pygame.draw.line(c, (10, 12, 16), (wnd.left, wnd.centery), (wnd.right, wnd.centery), 4)
-
         fp, fe = self.fight.player, self.fight.enemy
+        if self.art:
+            self.art.draw(c, 0, (fp.x + fe.x) / 2)               # жауынгерлерге қарай жеңіл параллакс
+            self.blizzard.draw(c, brightness=0.3)
+        else:
+            c.blit(sc.surface, (0, 0))
+            for wnd in sc.windows:
+                prev = c.get_clip()
+                c.set_clip(wnd)
+                self.blizzard.draw(c, brightness=0.9)
+                c.set_clip(prev)
+                pygame.draw.line(c, (10, 12, 16), (wnd.centerx, wnd.top), (wnd.centerx, wnd.bottom), 4)
+                pygame.draw.line(c, (10, 12, 16), (wnd.left, wnd.centery), (wnd.right, wnd.centery), 4)
+
+
         spec_p, spec_e = fp.spec, fe.spec
         ap, ae = tuple(spec_p["accent"]), tuple(spec_e["accent"])
+        cor0 = self.game.corruption
         for fighter, accent in ((fe, ae), (fp, ap)):
-            reach = draw_fighter(c, fighter, accent, self.t, part="body")
+            if has_fighter_sprite(fighter):
+                det = protagonist_detail(cor0) if fighter is fp else 1.0
+                reach = draw_fighter_sprite(c, fighter, self.t, detail=det)
+            else:
+                reach = draw_fighter(c, fighter, accent, self.t, part="body")
             self._push_trail(fighter, reach)
         self._draw_trails(c)
         self.particles.draw(c)
 
-        lights = list(sc.lights)
+        lights = list(sc.lights) if sc else []
         lights.append(dict(x=fp.x, y=GROUND - 150, r=330, color=(190, 215, 255),
                            i=0.85, flicker=0, seed=0))
         for x, y, r, life, mx, color in self.flashes:
             lights.append(dict(x=x, y=y, r=r, color=color, i=min(1.0, life / mx * 1.3),
                                flicker=0, seed=0))
-        self.lighting.ambient = sc.ambient
+        self.lighting.ambient = ART_AMBIENT if self.art else sc.ambient
         self.lighting.render(c, lights, 0, self.t)
         cor = self.game.corruption
-        draw_fighter(c, fe, ae, self.t, part="accent")
-        draw_fighter(c, fp, ap, self.t, part="accent", detail=protagonist_detail(cor))
+        if not has_fighter_sprite(fe):
+            draw_fighter(c, fe, ae, self.t, part="accent")
+        if not has_fighter_sprite(fp):
+            draw_fighter(c, fp, ap, self.t, part="accent", detail=protagonist_detail(cor))
         self._draw_tell(c, ae)
         c.blit(self.vignette, (0, 0))
         if self.time_scale < 0.6:  # баяулау: суық реңк

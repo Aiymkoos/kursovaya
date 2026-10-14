@@ -74,3 +74,19 @@ def test_artscene_parallax_and_door_marker():
     art.draw(surf, 1120, 2000)                         # соңғы камера орны: шектен шықпайды
     assert surf.get_at((640, 360))[:3] == (40, 60, 120)
     artscene.draw_door_marker(surf, 640, 640, 120, 1.0)
+
+
+def test_fighter_sprite_draws_all_states_and_returns_reach(monkeypatch):
+    from kolenke.combat.fight import Fight
+    from kolenke.render import fighter_draw
+    surf = pygame.Surface((1280, 720), pygame.SRCALPHA)
+    fight = Fight("darkhan")
+    assert fighter_draw.sprite_name(fight.player) == "me"
+    for f in (fight.player, fight.enemy):
+        if not fighter_draw.has_fighter_sprite(f):
+            continue
+        for state in ("idle", "block", "hurt", "stagger", "dead"):
+            f.state = state
+            fighter_draw.draw_fighter_sprite(surf, f, 1.0)
+        f.flash = 3
+        fighter_draw.draw_fighter_sprite(surf, f, 1.0, detail=0.3)

@@ -169,10 +169,44 @@ def blizzard(duration=4.0, seed=13):
     return _pack(out)
 
 
+def music(duration=24.0, seed=21):
+    """Фондық музыка: ля минордағы баяу аккордтар (Am–F–C–G), алыстан естілетін қоңыраулар.
+
+    Үзіліссіз қайталанады: аккордтар мен қоңыраулардың «құйрығы» басына айналып жалғасады."""
+    rng = random.Random(seed)
+    n = _n(duration)
+    buf = [0.0] * n
+    chords = [(110.00, 164.81, 220.00, 261.63), (87.31, 130.81, 174.61, 220.00),
+              (130.81, 196.00, 261.63, 329.63), (98.00, 146.83, 196.00, 246.94)]
+    seg = n // len(chords)
+    fade = int(RATE * 1.6)                       # аккордтар арасындағы жұмсақ өту
+    two_pi = 2 * math.pi / RATE
+    for k, chord in enumerate(chords):
+        start = k * seg - fade
+        length = seg + 2 * fade
+        for f in chord:
+            for det in (-0.35, 0.35):             # шамалы бұрмаланған қос дауыс: «хор» әсері
+                w = two_pi * (f + det)
+                for i in range(length):
+                    win = min(i, length - 1 - i) / fade
+                    win = 1.0 if win > 1.0 else 0.5 - 0.5 * math.cos(math.pi * win)
+                    buf[(start + i) % n] += math.sin(w * i) * win * 0.045
+    bells = [440.00, 523.25, 659.25, 783.99, 880.00]
+    t = 1.2
+    while t < duration - 3.0:
+        f = rng.choice(bells)
+        s = int(t * RATE)
+        for i in range(_n(2.4)):
+            env = math.exp(-i / RATE * 1.8) * min(1.0, i / (RATE * 0.01))
+            buf[(s + i) % n] += (math.sin(two_pi * f * i) + 0.3 * math.sin(two_pi * f * 2.01 * i)) * env * 0.05
+        t += rng.uniform(2.6, 4.8)
+    return _pack(buf, 1.0)
+
+
 SOUNDS = {
     "hit": lambda: hit(False), "heavy_hit": lambda: hit(True), "block": block,
     "parry": parry, "whoosh": whoosh, "whoosh_light": lambda: whoosh(True, 0.16),
     "chime": chime, "boom": boom, "swell": swell, "tick": lambda: tick(False),
     "tock": lambda: tick(True), "drum": drum, "knife": knife, "stitch": stitch,
-    "click": click, "blizzard": blizzard,
+    "click": click, "blizzard": blizzard, "music": music,
 }

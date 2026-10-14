@@ -5,6 +5,10 @@ from PyInstaller.utils.hooks import collect_data_files
 
 datas = [
     ("assets/fonts", "assets/fonts"),
+    ("assets/bg", "assets/bg"),
+    ("assets/portraits", "assets/portraits"),
+    ("assets/sprites", "assets/sprites"),
+    ("assets/audio", "assets/audio"),
     ("kolenke/data", "kolenke/data"),
 ]
 

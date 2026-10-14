@@ -96,3 +96,21 @@ def test_fight_events_trigger_matching_sounds():
         assert g.audio.calls == ["whoosh", "knife"]     # дайындықта Дарханның пышақ мотиві
     finally:
         pygame.quit()
+
+
+def test_music_is_a_seamless_loop_and_menu_starts_it():
+    s = array.array("h")
+    s.frombytes(audio_synth.SOUNDS["music"]())
+    assert len(s) / audio_synth.RATE >= 20                       # ұзақ цикл
+    typical = max(abs(s[i + 1] - s[i]) for i in range(5000, 8000))
+    assert abs(s[0] - s[-1]) <= max(typical * 3, 800)             # тігіс жерінде сарт жоқ
+
+
+def test_menu_defaults_to_new_game(monkeypatch):
+    from kolenke.scenes.menu import MenuScene
+    g = Game(fullscreen=False)
+    try:
+        g.push(MenuScene(g))
+        assert g.scene.items[g.scene.index][1] == g.scene._new_game
+    finally:
+        pygame.quit()

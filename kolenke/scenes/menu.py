@@ -46,6 +46,7 @@ class MenuScene(Scene):
 
     def on_enter(self):
         self.game.audio.loop("blizzard", 0.32)
+        self.game.audio.loop("music", 0.38)          # фондық музыка (бүкіл ойын бойы)
 
     def _build_items(self):
         s = self.game.strings
@@ -53,7 +54,7 @@ class MenuScene(Scene):
         if has_save():
             self.items.append((s["menu_continue"], self._continue))
         self.items += [(s["menu_new_game"], self._new_game), (s["menu_quit"], self.game.quit)]
-        self.index = 0
+        self.index = next(i for i, it in enumerate(self.items) if it[1] == self._new_game)   # әдепкі: «Жаңа ойын»
 
     def on_resume(self):
         self._build_items()

@@ -133,6 +133,8 @@ def test_menu_shows_continue_only_with_save(game):
     save_game(game)
     game.scene.on_resume()
     assert len(game.scene.items) == 3
+    assert game.scene.index == 1               # әдепкі таңдау — «Жаңа ойын»
+    game.scene.handle_action("up")
     game.scene.handle_action("confirm")        # «Жалғастыру»
     assert isinstance(game.scene, ExploreScene)
 

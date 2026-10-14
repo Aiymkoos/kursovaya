@@ -31,3 +31,13 @@ HERO / ACCENT (файлы `<имя>_human.png`, `_fading.png`, `_shadow.png`):
 - `madina` — young woman, hair in a bun, plum cardigan, measuring tape around neck / magenta
 - `bekzat` — young man, round glasses, messy black hair, vest with tie, metronome pin / pale yellow
 - `me` — protagonist, young person, dark brown hair, blue jacket, long scarf / light blue
+
+## Спрайты для сцены ходьбы (`assets/sprites/<имя>.png`)
+Полный рост, вид сбоку (лицом вправо), белый фон, потом вырезать фон (rembg / remove.bg). Формат вертикальный 2:3. Файл подхватывается автоматически;
+без него в коридоре рисуется силуэт кодом. Готовы: `me.png`, `darkhan.png`. Нужны: `zhanel.png`, `madina.png`, `bekzat.png`.
+
+Шаблон: `full-body character sprite, [HERO], standing, side view facing right, [ACCENT] as the only color accent, plain white background, visual novel game sprite, whole body from head to feet, anime-inspired illustration, soft painterly shading, dark navy and violet palette, highly detailed, no text, no watermark`
+
+- `zhanel` — young woman, long black hair, headphones around neck, teal hoodie / teal
+- `madina` — young woman, hair in a bun, plum cardigan, measuring tape around neck / magenta
+- `bekzat` — young man, round glasses, messy black hair, vest with tie, metronome pin / pale yellow

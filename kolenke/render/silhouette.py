@@ -13,6 +13,10 @@ STEEL = (150, 156, 168)
 _shadow_cache = {}
 
 
+def _fade(c, k):
+    return tuple(int(BODY[i] + (c[i] - BODY[i]) * k) for i in range(3))
+
+
 def _shadow(width):
     key = int(width)
     if key not in _shadow_cache:
@@ -31,6 +35,15 @@ def draw_silhouette(surface, x, ground_y, accent, facing=1, swing=0.0,
     """
     s = scale
     col = body_color or BODY
+    painted = body_color is None and detail > 0       # түсті киім (көлеңке жұтқанда қараяды)
+    if painted:
+        coat = _fade(tuple(int(accent[i] * 0.42 + (40, 46, 70)[i] * 0.58) for i in range(3)), detail)
+        pants = _fade((34, 38, 56), detail)
+        skin = _fade((232, 190, 154), detail)
+        hair = _fade((46, 34, 30), detail)
+        edge = _fade(tuple(int(v * 1.35) for v in coat), detail)
+    else:
+        coat = pants = skin = hair = edge = col
     hip_y = ground_y - 82 * s
     shoulder_y = ground_y - 142 * s
     head_y = ground_y - 162 * s
@@ -44,17 +57,23 @@ def draw_silhouette(surface, x, ground_y, accent, facing=1, swing=0.0,
         for side in (-1, 1):  # аяқтар
             lift = max(0.0, swing * side) * 7 * s
             foot = (x + side * 7 * s + swing * side * 20 * s, ground_y - lift)
-            pygame.draw.line(surface, col, (x + side * 7 * s, hip_y), foot,
+            pygame.draw.line(surface, pants, (x + side * 7 * s, hip_y), foot,
                              max(1, int(10 * s)))
-        pygame.draw.polygon(surface, col, [  # пальто
+        pygame.draw.polygon(surface, coat, [  # пальто
             (sx - 19 * s, shoulder_y), (sx + 19 * s, shoulder_y),
             (x + 25 * s, hip_y + 14 * s), (x - 25 * s, hip_y + 14 * s)])
+        if painted:                                   # жарық жиегі + белбеу
+            pygame.draw.line(surface, edge, (sx - 19 * s, shoulder_y), (x - 25 * s, hip_y + 14 * s),
+                             max(1, int(3 * s)))
+            pygame.draw.line(surface, pants, (x - 24 * s, hip_y + 8 * s), (x + 24 * s, hip_y + 8 * s),
+                             max(1, int(4 * s)))
         for side in (-1, 1):  # қолдар
             shoulder = (sx + side * 18 * s, shoulder_y + 4 * s)
             if arm_angle is not None and side == facing:
                 d = (facing * math.sin(arm_angle), math.cos(arm_angle))
                 hand = (shoulder[0] + d[0] * 52 * s, shoulder[1] + d[1] * 52 * s)
-                pygame.draw.line(surface, col, shoulder, hand, max(1, int(8 * s)))
+                pygame.draw.line(surface, coat, shoulder, hand, max(1, int(8 * s)))
+                pygame.draw.circle(surface, skin, (int(hand[0]), int(hand[1])), max(1, int(4 * s)))
                 tip = hand
                 if weapon:
                     tip = (hand[0] + d[0] * weapon * s, hand[1] + d[1] * weapon * s)
@@ -63,9 +82,15 @@ def draw_silhouette(surface, x, ground_y, accent, facing=1, swing=0.0,
                 reach = (hand, tip)
             else:
                 hand = (x + side * 22 * s - swing * side * 12 * s, shoulder_y + 52 * s)
-                pygame.draw.line(surface, col, shoulder, hand, max(1, int(8 * s)))
-        pygame.draw.line(surface, col, (sx, shoulder_y), (hx, head_y), int(9 * s))
-        pygame.draw.circle(surface, col, (int(hx), int(head_y)), max(2, int(15 * s)))
+                pygame.draw.line(surface, coat, shoulder, hand, max(1, int(8 * s)))
+                pygame.draw.circle(surface, skin, (int(hand[0]), int(hand[1])), max(1, int(4 * s)))
+        pygame.draw.line(surface, skin, (sx, shoulder_y), (hx, head_y), int(9 * s))
+        pygame.draw.circle(surface, skin, (int(hx), int(head_y)), max(2, int(15 * s)))
+        if painted:                                   # шаш
+            r = max(2, int(15 * s))
+            pygame.draw.circle(surface, hair, (int(hx - facing * 2 * s), int(head_y - 3 * s)), r,
+                               draw_top_left=True, draw_top_right=True)
+            pygame.draw.circle(surface, hair, (int(hx - facing * 8 * s), int(head_y)), int(9 * s))
     if part in ("accent", "all") and detail > 0:
         c = tuple(int(BODY[i] + (accent[i] - BODY[i]) * detail) for i in range(3))
         neck_y = shoulder_y - 3 * s

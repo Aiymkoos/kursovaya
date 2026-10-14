@@ -66,7 +66,7 @@ kolenke.combat.ai.adaptive,AdaptiveAI,класс,Бейімделгіш қарс
 kolenke.render.scenery,WALL_BOTTOM,тұрақты,"Қабырға мен еденнің шекарасы, px"
 kolenke.render.scenery,Scenery,класс,"Алдын ала сызылған локация фоны, терезелер және жарықтар"
 kolenke.render.portrait,CHARACTERS,тұрақты,Кейіпкерлердің акцент түстері
-kolenke.render.portrait,STATE_DETAIL,тұрақты,Портрет күйлеріне сәйкес детальдылық деңгейі
+kolenke.render.portrait,LOOK,тұрақты,"Кейіпкер келбеті: тері, шаш, киім түстері және шаш үлгісі"
 kolenke.render.particles,ParticleSystem,класс,"Бөлшектер жүйесі: ұшқын, шаң, көлеңке бөлшектері"
 kolenke.render.particles,Blizzard,класс,Боран бөлшектері
 kolenke.render.effects,Fade,класс,Қараңғыға өту эффектісі

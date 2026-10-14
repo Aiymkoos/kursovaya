@@ -35,10 +35,10 @@ def blurred_room(room, size):
         small = pygame.transform.smoothscale(small, (w // 25, h // 25))
         img = pygame.transform.smoothscale(small, (w, h))
         lift = pygame.Surface(size)
-        lift.fill((20, 22, 34))
+        lift.fill((58, 60, 84))
         img.blit(lift, (0, 0), special_flags=pygame.BLEND_RGB_ADD)   # қараңғыда да көрінсін
         shade = pygame.Surface(size)
-        shade.fill((205, 205, 215))
+        shade.fill((240, 240, 248))
         img.blit(shade, (0, 0), special_flags=pygame.BLEND_RGB_MULT)
         _bg_cache[key] = img
     return _bg_cache[key]
@@ -233,7 +233,7 @@ class DialogueScene(Scene):
         bh = 190 + 54 * len(choices) if choices else 200
         box = pygame.Rect(70, h - bh - 24, w - 140, bh)
         who_col = CHARACTERS.get(speaker, NARRATOR)
-        surface.blit(panel(box.width, box.height, 218, (70, 72, 92)), box.topleft)
+        surface.blit(panel(box.width, box.height, 200, (110, 112, 140)), box.topleft)
         pygame.draw.line(surface, who_col, (box.x + 18, box.y + 1), (box.x + 190, box.y + 1), 3)
         name = self.graph.speakers.get(speaker, "")
         if name:

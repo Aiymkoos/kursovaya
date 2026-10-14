@@ -47,7 +47,7 @@ class Lighting:
         return max(0.0, abs(a) - 0.35) / 0.65
 
 
-def make_vignette(size, strength=215):
+def make_vignette(size, strength=120):
     small = pygame.Surface((64, 36), pygame.SRCALPHA)
     for y in range(36):
         for x in range(64):

@@ -25,7 +25,7 @@ def _gradient(width, y0, y1, top, bottom, surf):
 
 
 def _floor(surf, width):
-    _gradient(width, WALL_BOTTOM, H, (38, 30, 27), (14, 11, 10), surf)
+    _gradient(width, WALL_BOTTOM, H, (84, 66, 58), (36, 28, 26), surf)
     y, step = WALL_BOTTOM + 8, 10
     while y < H:
         pygame.draw.line(surf, (10, 8, 8), (0, y), (width, y))
@@ -69,7 +69,7 @@ def _lamp_fixture(surf, x, y=64):
 def build_corridor(loc, objects, night=0):
     w = loc.width
     surf = pygame.Surface((w, H))
-    _gradient(w, 0, WALL_BOTTOM, (44, 52, 64), (26, 30, 38), surf)
+    _gradient(w, 0, WALL_BOTTOM, (78, 92, 116), (48, 58, 76), surf)
     pygame.draw.rect(surf, (12, 14, 18), (0, 0, w, 60))
     for x in range(0, w, 300):
         pygame.draw.rect(surf, (18, 20, 25), (x, 0, 14, 60))
@@ -94,7 +94,7 @@ def build_corridor(loc, objects, night=0):
     for wnd in windows:  # терезеден түсетін суық жарық
         lights.append(dict(x=wnd.centerx, y=wnd.centery + 60, r=300,
                            color=(110, 150, 220), i=0.75, flicker=0, seed=0))
-    return Scenery(surf, windows, lights, pillars, ambient=(46, 54, 78))
+    return Scenery(surf, windows, lights, pillars, ambient=(120, 130, 168))
 
 
 def _room_darkhan(surf, lights):
@@ -145,14 +145,14 @@ def _room_bekzat(surf, lights):
 
 ROOM_VARIANTS = {"darkhan_room": _room_darkhan, "girls_room": _room_girls,
                  "bekzat_room": _room_bekzat}
-ROOM_AMBIENT = {"darkhan_room": (58, 50, 66), "girls_room": (60, 52, 68),
-                "bekzat_room": (46, 44, 62)}
+ROOM_AMBIENT = {"darkhan_room": (140, 124, 148), "girls_room": (142, 126, 150),
+                "bekzat_room": (122, 118, 150)}
 
 
 def build_room(loc, objects, night=0):
     w = loc.width
     surf = pygame.Surface((w, H))
-    _gradient(w, 0, WALL_BOTTOM, (52, 44, 50), (30, 26, 32), surf)
+    _gradient(w, 0, WALL_BOTTOM, (104, 84, 92), (66, 54, 64), surf)
     pygame.draw.rect(surf, (14, 12, 16), (0, 0, w, 40))
     _floor(surf, w)
     windows = []
@@ -162,7 +162,7 @@ def build_room(loc, objects, night=0):
     for o in objects:
         if o.kind == "door":
             _door(surf, o)
-    return Scenery(surf, windows, lights, [], ambient=ROOM_AMBIENT.get(loc.id, (58, 50, 66)))
+    return Scenery(surf, windows, lights, [], ambient=ROOM_AMBIENT.get(loc.id, (140, 124, 148)))
 
 
 def build_scenery(loc, night=0):

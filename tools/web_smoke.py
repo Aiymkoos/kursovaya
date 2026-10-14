@@ -25,8 +25,10 @@ threading.Thread(target=httpd.serve_forever, daemon=True).start()
 
 logs = []
 with sync_playwright() as p:
-    browser = p.chromium.launch(args=["--autoplay-policy=no-user-gesture-required",
-                                      "--use-gl=swiftshader", "--enable-unsafe-swiftshader"])
+    browser = p.chromium.launch(channel="chromium",     # толық Chromium (жаңа headless): WebGL/canvas дұрыс сызылады
+                                args=["--autoplay-policy=no-user-gesture-required",
+                                      "--use-gl=angle", "--use-angle=swiftshader",
+                                      "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"])
     page = browser.new_page(viewport={"width": 1280, "height": 720})
     page.on("console", lambda m: logs.append(m.text))
     page.on("pageerror", lambda e: logs.append("PAGEERROR " + str(e)))
@@ -40,6 +42,13 @@ with sync_playwright() as p:
             break
     page.wait_for_timeout(8000)                  # біраз ойнатып, содан кейін скриншот
     page.screenshot(path=str(out))
+    try:
+        print("title:", page.title())
+        print("body text:", page.inner_text("body")[:300].replace("\n", " | "))
+        print("canvases:", page.evaluate(
+            "Array.from(document.querySelectorAll('canvas')).map(c=>[c.id,c.width,c.height,c.clientWidth,c.clientHeight])"))
+    except Exception as exc:                     # диагностика ғана
+        print("diag failed:", exc)
     browser.close()
 print(f"waited {waited}s")
 
@@ -51,6 +60,11 @@ bright = sum(1 for y in range(0, h, 4) for x in range(0, w, 4) if sum(px[x, y]) 
 red = sum(1 for y in range(0, h, 2) for x in range(0, w, 2)
           if abs(px[x, y][0] - 200) < 40 and abs(px[x, y][1] - 60) < 40 and abs(px[x, y][2] - 60) < 40) * 4
 print(f"screenshot {w}x{h}: bright={bright / total:.3f} accent_red_px={red}")
+print("--- ASCII preview 64x24 (brightness) ---")
+small = img.resize((64, 24)).convert("L")
+ramp = " .:-=+*#%@"
+for y in range(24):
+    print("".join(ramp[small.getpixel((x, y)) * 9 // 255] for x in range(64)))
 print("--- console (last 60) ---")
 for line in logs[-60:]:
     print(line[:220])

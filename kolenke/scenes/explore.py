@@ -8,6 +8,7 @@ from kolenke.core.scene import Scene
 from kolenke.explore.locations import load_locations
 from kolenke.explore.player import Player
 from kolenke.render.corruption import draw_corruption, hidden, protagonist_detail
+from kolenke.render.artscene import AMBIENT as ART_AMBIENT, ArtBackdrop, draw_door_marker
 from kolenke.render.effects import Fade
 from kolenke.render.lighting import Lighting, make_vignette
 from kolenke.render.particles import Blizzard, ParticleSystem
@@ -34,6 +35,7 @@ class ExploreScene(Scene):
         self.night = night or game.night
         self.locs = load_locations(LOCATIONS_PATH)
         self._scenery = {}
+        self._art = {}
         self.t = 0.0
         w, h = game.screen.get_size()
         self.size = (w, h)
@@ -53,6 +55,13 @@ class ExploreScene(Scene):
         self._summary_shown = False
 
     # --- көмекші ---
+    def _backdrop(self):
+        """Дайын сурет фоны (assets/bg) немесе None — сонда кодпен сызылған декорация."""
+        key = self.loc.id
+        if key not in self._art:
+            self._art[key] = ArtBackdrop.load(self.loc, self.size)
+        return self._art[key]
+
     @property
     def scenery(self):
         key = (self.loc.id, self.night)
@@ -152,6 +161,7 @@ class ExploreScene(Scene):
         if self.night != self.game.night:      # жаңа түн басталды
             self.night = self.game.night
             self._scenery.clear()
+            self._art.clear()
             self._reset("corridor")
 
     # --- логика ---
@@ -179,11 +189,19 @@ class ExploreScene(Scene):
 
     # --- сызу ---
     def draw(self, surface):
-        sc = self.scenery
+        art = self._backdrop()
+        sc = None if art else self.scenery
         w, h = self.size
         cam = int(self.cam)
-        surface.blit(sc.surface, (0, 0), pygame.Rect(cam, 0, w, h))
-        for wnd in sc.windows:  # терезе артындағы боран
+        if art:
+            art.draw(surface, cam, self.player.x)
+            for o in self.loc.objects:
+                if o.kind == "door" and o.active(self.night):
+                    draw_door_marker(surface, o.x - cam, GROUND, o.w, self.t)
+            self.blizzard.draw(surface, brightness=0.32)       # ішке түсетін қар
+        else:
+            surface.blit(sc.surface, (0, 0), pygame.Rect(cam, 0, w, h))
+        for wnd in (sc.windows if sc else []):  # терезе артындағы боран
             r = wnd.move(-cam, 0)
             if r.right < 0 or r.left > w:
                 continue
@@ -202,16 +220,16 @@ class ExploreScene(Scene):
                     detail=protagonist_detail(c))
         self.dust.draw(surface, cam)
 
-        lights = sc.lights + [dict(x=p.x, y=GROUND - 150, r=320, color=(190, 215, 255),
-                                   i=0.9 * (1 - 0.5 * c), flicker=0, seed=0)]
-        self.lighting.ambient = sc.ambient
+        lights = (sc.lights if sc else []) + [dict(x=p.x, y=GROUND - 150, r=320, color=(190, 215, 255),
+                                                   i=0.9 * (1 - 0.5 * c), flicker=0, seed=0)]
+        self.lighting.ambient = ART_AMBIENT if art else sc.ambient
         self.lighting.render(surface, lights, cam, self.t)
 
         for o in npcs:  # акцент жарықтан кейін — «жарқырайды»
             self._actor(surface, o.who, o.x - cam, o.accent, -1, 0.0, "accent")
         self._actor(surface, "me", p.x - cam, PLAYER_ACCENT, p.facing, p.swing, "accent",
                     detail=protagonist_detail(c))
-        for px in sc.pillars:  # алдыңғы план: параллакс 1.25x
+        for px in (sc.pillars if sc else []):  # алдыңғы план: параллакс 1.25x
             sx = int(px - self.cam * 1.25)
             if -100 < sx < w:
                 pygame.draw.rect(surface, (3, 3, 5), (sx - 30, 0, 60, h))
@@ -226,7 +244,9 @@ class ExploreScene(Scene):
         болмаса код сызған силуэт (дене — жарыққа дейін, акцент — кейін)."""
         if has_sprite(name):
             if part == "body":
-                draw_sprite(surface, name, x, GROUND, facing, swing, self.t, detail)
+                room = self.loc.width <= self.size[0]           # бөлмеде жиһазға сай үлкенірек
+                draw_sprite(surface, name, x, GROUND, facing, swing, self.t, detail,
+                            scale=1.25 if room else 1.0)
             return
         draw_silhouette(surface, x, GROUND, accent, facing=facing, swing=swing,
                         t=self.t, part=part, detail=detail if part == "accent" else 1.0)

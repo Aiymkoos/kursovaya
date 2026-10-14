@@ -53,3 +53,24 @@ def test_sprite_is_cropped_scaled_and_drawn(tmp_path, monkeypatch):
     surf = pygame.Surface((400, 400))
     assert sprite.draw_sprite(surf, "hero", 200, 300, facing=-1, swing=0.5, t=1.0, detail=0.2)
     assert surf.get_at((200, 250))[:3] != (0, 0, 0)                     # фигура экранда сызылды
+
+
+def test_artscene_missing_backdrop_falls_back(monkeypatch):
+    from kolenke.explore.locations import Location
+    from kolenke.render import artscene
+    monkeypatch.setattr(artscene, "load_image", lambda *a, **k: None)
+    assert artscene.ArtBackdrop.load(Location("corridor", 2400, "", 300, []), (1280, 720)) is None
+    assert artscene.ArtBackdrop.load(Location("unknown_loc", 1280, "", 100, []), (1280, 720)) is None
+
+
+def test_artscene_parallax_and_door_marker():
+    from kolenke.explore.locations import Location
+    from kolenke.render import artscene
+    img = pygame.Surface((1344, 768))
+    img.fill((40, 60, 120))
+    art = artscene.ArtBackdrop(pygame.transform.smoothscale(img, (1700, 922)), 2400, 1280)
+    surf = pygame.Surface((1280, 720))
+    art.draw(surf, 0, 300)
+    art.draw(surf, 1120, 2000)                         # соңғы камера орны: шектен шықпайды
+    assert surf.get_at((640, 360))[:3] == (40, 60, 120)
+    artscene.draw_door_marker(surf, 640, 640, 120, 1.0)

@@ -67,7 +67,7 @@ def _shadow(width):
     return _shadows[key]
 
 
-def draw_sprite(surface, name, x, ground_y, facing=1, swing=0.0, t=0.0, detail=1.0):
+def draw_sprite(surface, name, x, ground_y, facing=1, swing=0.0, t=0.0, detail=1.0, scale=1.0):
     """Спрайтты табанын ground_y-ге қойып сызады. Жүргенде жеңіл секіреді, тұрғанда тыныс алады.
 
     Қайтарады: True — сурет бар және сызылды; False — файл жоқ (силуэт сызу керек)."""
@@ -77,9 +77,9 @@ def draw_sprite(surface, name, x, ground_y, facing=1, swing=0.0, t=0.0, detail=1
     moving = abs(swing) > 0.02
     bob = abs(swing) * 5 if moving else 0.0                    # қадам кезінде жоғары-төмен
     breathe = 1.0 + 0.012 * math.sin(t * 2.0 + len(name))      # тынық күйде жеңіл тыныс
-    h = int(img.get_height() * (1.0 if moving else breathe))
+    h = int(img.get_height() * scale * (1.0 if moving else breathe))
     if h != img.get_height():
-        img = pygame.transform.smoothscale(img, (img.get_width(), h))
+        img = pygame.transform.smoothscale(img, (max(1, round(img.get_width() * h / img.get_height())), h))
     sh = _shadow(img.get_width() * 0.9)
     surface.blit(sh, sh.get_rect(center=(x, ground_y + 2)))
     surface.blit(img, img.get_rect(midbottom=(x, ground_y + 4 - bob)))

@@ -91,7 +91,7 @@ jobs:
         continue-on-error: true
         run: |
           playwright install --with-deps chromium
-          python tools/web_smoke.py pkg/build/web 60
+          python tools/web_smoke.py pkg/build/web 240
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -105,6 +105,7 @@ jobs:
   deploy:
     needs: web
     runs-on: ubuntu-latest
+    continue-on-error: true   # Pages әлі қосылмаған болса, қалған нәтиже жарамсыз болып қалмайды
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

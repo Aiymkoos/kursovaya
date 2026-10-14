@@ -31,11 +31,17 @@ with sync_playwright() as p:
     page.on("console", lambda m: logs.append(m.text))
     page.on("pageerror", lambda e: logs.append("PAGEERROR " + str(e)))
     page.goto("http://127.0.0.1:8000/index.html")
-    page.wait_for_timeout(25000)
-    page.mouse.click(640, 360)                 # pygbag: «Ready to start! Please click» 
-    page.wait_for_timeout(wait_s * 1000)
+    waited = 0
+    while waited < wait_s:                       # pygbag: «Ready to start! Please click» — дайын болғанша басу
+        page.wait_for_timeout(10000)
+        waited += 10
+        page.mouse.click(640, 360)
+        if any(l.startswith("FPS ") for l in logs):
+            break
+    page.wait_for_timeout(8000)                  # біраз ойнатып, содан кейін скриншот
     page.screenshot(path=str(out))
     browser.close()
+print(f"waited {waited}s")
 
 img = Image.open(out).convert("RGB")
 w, h = img.size
@@ -45,11 +51,13 @@ bright = sum(1 for y in range(0, h, 4) for x in range(0, w, 4) if sum(px[x, y]) 
 red = sum(1 for y in range(0, h, 2) for x in range(0, w, 2)
           if abs(px[x, y][0] - 200) < 40 and abs(px[x, y][1] - 60) < 40 and abs(px[x, y][2] - 60) < 40) * 4
 print(f"screenshot {w}x{h}: bright={bright / total:.3f} accent_red_px={red}")
-print("--- console (последние 40) ---")
-for line in logs[-40:]:
-    print(line[:200])
+print("--- console (last 60) ---")
+for line in logs[-60:]:
+    print(line[:220])
 fps = [l for l in logs if l.startswith("FPS ")]
 print("FPS lines:", fps[-5:])
-ok = bright / total > 0.01
+errors = [l for l in logs if "Traceback" in l or l.startswith("PAGEERROR")]
+print("errors:", errors[:5])
+ok = bool(fps) and red > 50          # нақты ойын кадрлары: FPS журналы және мәзірдің қызыл белгісі
 print("WEB SMOKE", "OK" if ok else "FAILED")
 sys.exit(0 if ok else 1)

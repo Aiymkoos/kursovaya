@@ -34,9 +34,9 @@ class Audio:
         if name not in SOUNDS:
             raise KeyError(f"Белгісіз дыбыс: {name}")
         if name not in self._cache:
-            wav = AUDIO_DIR / f"{name}.wav"
-            if wav.exists():          # дайын файл (синтезді күтпей, жылдам жүктеледі)
-                self._cache[name] = pygame.mixer.Sound(str(wav))
+            ready = next((p for ext in (".ogg", ".wav") if (p := AUDIO_DIR / f"{name}{ext}").exists()), None)
+            if ready:                 # дайын файл (синтезді күтпей, жылдам жүктеледі)
+                self._cache[name] = pygame.mixer.Sound(str(ready))
             else:
                 self._cache[name] = pygame.mixer.Sound(buffer=SOUNDS[name]())
         return self._cache[name]

@@ -80,6 +80,10 @@ jobs:
           cp main.py pkg/
           cp -r kolenke assets pkg/
           python tools/make_audio.py pkg/assets/audio
+          # pygbag тек OGG қабылдайды: wav -> ogg
+          sudo apt-get install -y ffmpeg > /dev/null
+          for f in pkg/assets/audio/*.wav; do ffmpeg -loglevel error -y -i "$f" -c:a libvorbis "${f%.wav}.ogg"; rm "$f"; done
+          ls pkg/assets/audio
       - name: Build with pygbag
         run: python -m pygbag --build --app_name kolenke --title "Көлеңке" pkg
       - run: ls -la pkg/build/web

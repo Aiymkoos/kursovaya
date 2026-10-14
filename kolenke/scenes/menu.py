@@ -9,8 +9,8 @@ from kolenke.core.scene import Scene
 from kolenke.render.lighting import make_vignette
 from kolenke.render.particles import Blizzard
 from kolenke.render.portrait import draw_portrait
-from kolenke.scenes.dialogue import blurred_room
-from kolenke.scenes.explore import ExploreScene
+from kolenke.scenes.dialogue import DialogueScene, blurred_room
+from kolenke.scenes.explore import DATA_DIR, ExploreScene
 
 ACCENT = (200, 60, 60)
 WHITE = (232, 232, 238)
@@ -66,6 +66,7 @@ class MenuScene(Scene):
         self.game.new_game_state()
         self.game.start_night(1)
         self.game.push(ExploreScene(self.game))
+        self.game.push(DialogueScene(self.game, DATA_DIR / "night0.json", night=0))   # пролог
 
     def handle_action(self, action):
         if action == "up":

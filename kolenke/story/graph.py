@@ -7,7 +7,7 @@ set ({флаг: мән}), memory (журналға жазба id).
 import json
 
 VALID_STATES = ("human", "fading", "shadow")
-VALID_BG = ("darkhan_room", "girls_room", "bekzat_room")
+VALID_BG = ("darkhan_room", "girls_room", "bekzat_room", "corridor", "hall_entrance")
 OFFSCREEN = ("narrator", "me")   # экранда портреті жоқ
 
 
@@ -23,6 +23,8 @@ class DialogueGraph:
         self.speakers = data.get("speakers", {})
         self.memories = data.get("memories", {})
         self.bg = data.get("bg", "darkhan_room")
+        self.label = data.get("label")           # жоғарғы сол жақтағы белгі (мысалы, «Пролог»)
+        self.done_text = data.get("done_text")   # соңғы реплика астындағы хабар
         self.validate()
 
     @property

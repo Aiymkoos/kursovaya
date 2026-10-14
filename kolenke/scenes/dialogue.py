@@ -219,7 +219,8 @@ class DialogueScene(Scene):
         draw_corruption(surface, c, self.t)
         self._draw_box(surface, node, speaker, c)
         if not hidden(c, 0.7):
-            night = a.font(22).render(s["night_label"].format(n=self.night), True, GREY)
+            label = self.graph.label or s["night_label"].format(n=self.night)
+            night = a.font(22).render(label, True, GREY)
             surface.blit(night, (40, 30))
         if not hidden(c, 0.55):
             j = a.font(22).render(f"Tab · {len(self.game.journal)}", True, GREY)
@@ -266,7 +267,7 @@ class DialogueScene(Scene):
                 y += 54
         elif self.text_done:
             if r.finished:
-                done = a.font(22).render(s["night_done"], True, GREY)
+                done = a.font(22).render(self.graph.done_text or s["night_done"], True, GREY)
                 surface.blit(done, (box.right - done.get_width() - 40, box.bottom - 40))
             elif int(self.t * 2) % 2 == 0:       # ▼ — келесі реплика
                 pygame.draw.polygon(surface, who_col, [(box.right - 60, box.bottom - 38),

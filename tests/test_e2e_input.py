@@ -47,8 +47,21 @@ def walk_until(game, key, predicate, limit=900):
         game.step(1 / 60)
 
 
+def skip_prologue(game):
+    """Прологты Space/1 арқылы аяқтау: «Жаңа ойыннан» кейінгі бірінші сахна."""
+    assert isinstance(game.scene, DialogueScene) and game.scene.graph.id == "night0"
+    for _ in range(80):
+        if isinstance(game.scene, ExploreScene):
+            return
+        d = game.scene
+        for _ in range(75):                           # мәтін теріліп біту үшін
+            game.step(1 / 60)
+        press(game, pygame.K_1 if d.runner.has_choices else pygame.K_SPACE)
+
+
 def test_night1_with_real_keyboard_events(game):
-    press(game, pygame.K_RETURN)                      # «Жаңа ойын»
+    press(game, pygame.K_RETURN)                      # «Жаңа ойын» -> пролог
+    skip_prologue(game)
     sc = game.scene
     assert isinstance(sc, ExploreScene) and sc.night == 1
 
